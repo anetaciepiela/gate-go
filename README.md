@@ -1,1 +1,14 @@
-«^„©®)íÔÆ©V'°Ø­Mìm~ŠŞ×«Šx'{¢®š+µ·Ÿ¢·«¢ë^ŠÆuçC®Š]£	Ú~×«jº.µè¬i×^u)ÚrFÚ­ú+²Ö«¶)à®‹­x‰éºÕb{'¦ëC‰©h€&¥zwZ¬8š–ˆj÷F‹­zÀâjZ 5æ«o%b{¢uæÚ¬(^rFèÅë
+GateGo
+
+Sprint 1:
+- [ ] MapView
+    - [ ] EditText for entering new airport (before route is added)
+    - [ ] Dropdown (after a route is added)
+    - [ ] Snackbar for starting route
+- [ ] InputView
+    - [ ] Input Dialog
+    - [ ] Calendar Dialog
+- [ ] SavedRoutes Dialog
+- [ ] NearbyView
+    - [ ] Sidebar
+    - [ ] Checkboxes
