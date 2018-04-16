@@ -1,4 +1,1 @@
-GateGo
-
-Sprint 1:
-- [ ] MapView
+«^„©®)íÔÆ©V'°Ø­Mìm~ŠÞž×«Šx'{¢®š+µ·Ÿ¢·«¢ë^ŠÆuçC®Š]£	Ú~×«jº.µè¬i×^u)ÚrFÚ­ú+²Ö«¶)à®‹­x‰éºÕb{'¦ëC‰©h€&¥zwZ¬8š–ˆj÷F‹­zÀâjZ 5æ«o%b{¢uæÚ¬(^rFèÅë
