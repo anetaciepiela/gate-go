@@ -1,4 +1,8 @@
 <resources>
     <string name="app_name">GateGo</string>
     <string name="title_activity_maps">Map</string>
+    <string name="save">Save</string>
+    <string name="airport">Airport</string>
+    <string name="start_gate">Start gate...</string>
+    <string name="destination_gate">Destination gate...</string>
 </resources>

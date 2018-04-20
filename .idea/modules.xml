@@ -3,9 +3,7 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/GateGo_Android483.iml" filepath="$PROJECT_DIR$/GateGo_Android483.iml" />
-      <module fileurl="file://C:\Users\reesemm\AndroidStudioProjects\GateGo_Android483\GateGo_Android483.iml" filepath="C:\Users\reesemm\AndroidStudioProjects\GateGo_Android483\GateGo_Android483.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
-      <module fileurl="file://C:\Users\reesemm\AndroidStudioProjects\GateGo_Android483\app\app.iml" filepath="C:\Users\reesemm\AndroidStudioProjects\GateGo_Android483\app\app.iml" />
     </modules>
   </component>
 </project>

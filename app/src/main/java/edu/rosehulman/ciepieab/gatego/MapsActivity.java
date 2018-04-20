@@ -1,7 +1,14 @@
 package edu.rosehulman.ciepieab.gatego;
 
+import android.annotation.SuppressLint;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
+import android.support.annotation.NonNull;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
+import android.view.View;
+import android.widget.CalendarView;
+import android.widget.EditText;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -10,9 +17,14 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+import java.util.ArrayList;
+import java.util.GregorianCalendar;
+
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
 
     private GoogleMap mMap;
+    private EditText addAirportEditText;
+    //private ArrayList mAirports;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -22,6 +34,45 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
+
+        //mAirports = new ArrayList();
+        addAirportEditText = findViewById(R.id.add_airport_editText);
+
+        addAirportEditText.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //if (mAirports.size() == 0) {
+                showAddAirportDialog();
+                //}
+            }
+        });
+    }
+
+    @SuppressLint("ResourceType")
+    private void showAddAirportDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        View view = getLayoutInflater().inflate(R.layout.dialog_add_airport, null, false);
+        //Capture widgets
+        final EditText airportNameEditText = view.findViewById(R.id.airport_name_editText);
+        final EditText startGateEditText = view.findViewById(R.id.start_gate_editText);
+        final EditText destGateNameEditText = view.findViewById(R.id.dest_gate_editText);
+        final CalendarView calendarView = view.findViewById(R.id.calendar_view);
+        final GregorianCalendar calendar = new GregorianCalendar();
+        calendarView.setOnDateChangeListener(new CalendarView.OnDateChangeListener() {
+            @Override
+            public void onSelectedDayChange(@NonNull CalendarView view, int year, int month, int dayOfMonth) {
+                calendar.set(year, month, dayOfMonth);
+            }
+        });
+        builder.setPositiveButton(R.string.save, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                //TODO: get all input data, add an airport (model object) to mAirports
+            }
+        });
+        builder.setNegativeButton(android.R.string.cancel, null);
+        builder.setView(view);
+        builder.create().show();
     }
 
 
