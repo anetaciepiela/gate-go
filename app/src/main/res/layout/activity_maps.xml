@@ -10,13 +10,8 @@
 
     <EditText
         android:id="@+id/add_airport_editText"
-        android:layout_width="300dp"
-        android:layout_height="45dp"
-        android:layout_gravity="center_horizontal"
-        android:paddingLeft="20dp"
-        android:paddingRight="20dp"
+        style="@style/TextBoxStyle"
         android:layout_margin="15dp"
-        android:background="@drawable/rounded_corners"
         android:hint="Add airport..." />
 
 </fragment>
