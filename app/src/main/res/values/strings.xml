@@ -5,4 +5,9 @@
     <string name="airport">Airport</string>
     <string name="start_gate">Start gate...</string>
     <string name="destination_gate">Destination gate...</string>
+    <plurals name="date_format">
+        <item quantity="one">TODAY-%s</item>
+        <item quantity="two">TOMORROW-%s</item>
+        <item quantity="other">%s</item>
+    </plurals>
 </resources>
