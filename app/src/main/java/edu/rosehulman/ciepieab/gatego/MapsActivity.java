@@ -12,6 +12,7 @@ import android.widget.CalendarView;
 import android.widget.EditText;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.support.design.widget.Snackbar;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -22,6 +23,7 @@ import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 
@@ -35,10 +37,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private DateFormat mTodayTomorrowFormatter;
     private DateFormat mOtherDayFormatter;
 
-
-
-
-    //private ArrayList mAirports;
+    private ArrayList<Airport> mAirports;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,7 +45,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         setContentView(R.layout.activity_maps);
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
-                .findFragmentById(R.id.map);
+                .findFragmentById(R.id.map_view);
         mapFragment.getMapAsync(this);
 
         //mAirports = new ArrayList();
@@ -92,6 +91,14 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 //TODO: get all input data, add an airport (model object) to mAirports
+                Snackbar snackbar = Snackbar.make(findViewById(R.id.map_view), getResources().getString(R.string.route_time), Snackbar.LENGTH_INDEFINITE);
+                snackbar.setAction("Start Navigation", new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        //TODO: start navigation!
+                    }
+                });
+                snackbar.show();
             }
         });
         builder.setNegativeButton(android.R.string.cancel, null);

@@ -2,7 +2,7 @@
 <fragment xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:map="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/map"
+    android:id="@+id/map_view"
     android:name="com.google.android.gms.maps.SupportMapFragment"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -12,7 +12,17 @@
         android:id="@+id/add_airport_editText"
         style="@style/TextBoxStyle"
         android:layout_margin="15dp"
-        android:hint="Add airport..." />
+        android:hint="Add airport..."/>
+
+    <ImageView
+        android:layout_width="45dp"
+        android:layout_height="45dp"
+        android:id="@+id/nearby_frag_butt"
+        android:src="@drawable/ic_menu_black_24dp"
+        android:layout_marginTop="15dp"
+        android:layout_marginLeft="5dp"
+        android:background="@drawable/rounded_corners"
+        />
 
 </fragment>
 
