@@ -2,14 +2,18 @@ package edu.rosehulman.ciepieab.gatego;
 
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.content.DialogInterface;
 import android.support.annotation.NonNull;
+import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.CalendarView;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.support.design.widget.Snackbar;
@@ -29,13 +33,14 @@ import java.util.GregorianCalendar;
 
 import static java.lang.Math.abs;
 
-public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
+public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, NearbyFragment.OnSwipeListener{
 
     private GoogleMap mMap;
     private EditText addAirportEditText;
     private Calendar mCalendar;
     private DateFormat mTodayTomorrowFormatter;
     private DateFormat mOtherDayFormatter;
+    private ImageView mMenuButton;
 
     private ArrayList<Airport> mAirports;
 
@@ -52,7 +57,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mCalendar = Calendar.getInstance();
         mTodayTomorrowFormatter = new SimpleDateFormat("MM/dd/yy");
         mOtherDayFormatter = new SimpleDateFormat("E-MM/dd/yy");
+
         addAirportEditText = findViewById(R.id.add_airport_editText);
+        mMenuButton = findViewById(R.id.nearby_frag_butt);
 
         addAirportEditText.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -62,6 +69,21 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 //}
             }
         });
+
+        mMenuButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                showNearbyFragment();
+            }
+        });
+
+    }
+
+    private void showNearbyFragment() {
+        Fragment nearbyFrag = new NearbyFragment();
+        FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+        ft.replace(R.id.map_view, nearbyFrag);
+        ft.commit();
     }
 
     @SuppressLint("ResourceType")
@@ -166,5 +188,13 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         LatLng sydney = new LatLng(-34, 151);
         mMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
         mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
+    }
+
+    @Override
+    public void onSwipe() {
+        FragmentManager fm = getSupportFragmentManager();
+        FragmentTransaction ft = fm.beginTransaction();
+        fm.popBackStackImmediate();
+        ft.commit();
     }
 }

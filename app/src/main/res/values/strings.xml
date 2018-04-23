@@ -11,4 +11,12 @@
         <item quantity="two">TOMORROW-%s</item>
         <item quantity="other">%s</item>
     </plurals>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="restrooms">Restrooms</string>
+    <string name="restaurants">Restaurants</string>
+    <string name="coffee">Coffee</string>
+    <string name="shopping">Shopping</string>
+    <string name="nearby_title">Show nearby...</string>
 </resources>
