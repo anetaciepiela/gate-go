@@ -113,7 +113,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         builder.setPositiveButton(R.string.save, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
-                //TODO: get all input data, add an airport (model object) to mAirports
+                //TODO: get all input data, add route (model object) to mAirports
                 Snackbar snackbar = Snackbar.make(findViewById(R.id.map_view), getResources().getString(R.string.route_time), Snackbar.LENGTH_INDEFINITE);
                 snackbar.setAction("Start Navigation", new View.OnClickListener() {
                     @Override
@@ -189,10 +189,14 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         LatLng indyairport = new LatLng(39.7168593, -86.29559519999998);
         LatLng sydney = new LatLng(-34, 151);
         mMap.addMarker(new MarkerOptions().position(indyairport).title("Marker at airport"));
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(indyairport));
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(indyairport, 16));
+        //mMap.moveCamera(CameraUpdateFactory.newLatLng(indyairport));
+        //mMap.moveCamera(CameraUpdateFactory.zoomTo((float) indyairport.latitude));
         //mMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
         //mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
     }
+
+
 
     @Override
     public void onSwipe() {
