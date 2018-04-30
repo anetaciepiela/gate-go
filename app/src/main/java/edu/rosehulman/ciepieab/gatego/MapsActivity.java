@@ -25,16 +25,28 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.PolylineOptions;
+import com.google.maps.DirectionsApi;
+import com.google.maps.GeoApiContext;
+import com.google.maps.android.PolyUtil;
+import com.google.maps.errors.ApiException;
+import com.google.maps.model.DirectionsResult;
+import com.google.maps.model.TravelMode;
 
+import org.joda.time.DateTime;
+
+import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 import static java.lang.Math.abs;
 
-public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, NearbyFragment.OnSwipeListener{
+public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, NearbyFragment.OnSwipeListener {
 
     private GoogleMap mMap;
     private EditText addAirportEditText;
@@ -99,7 +111,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         final LinearLayout dateLayout = view.findViewById(R.id.date_layout);
         final TextView dateTextView = view.findViewById(R.id.date_text_view);
         final String todaysDate = mTodayTomorrowFormatter.format(mCalendar.getTime());
-        String defaultDate = getResources().getQuantityString(R.plurals.date_format, 1,todaysDate);
+        String defaultDate = getResources().getQuantityString(R.plurals.date_format, 1, todaysDate);
         dateTextView.setText(defaultDate);
         dateLayout.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -134,16 +146,14 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         Log.d("Day", String.valueOf(Integer.parseInt(selectedDate.substring(3, 4))));
         int dateDifference = abs(Integer.parseInt(todaysDate.substring(3, 5)) - Integer.parseInt(selectedDate.substring(3, 5)));
         String selectedDateFormatted = "";
-        if(dateDifference == 0) {
-            selectedDateFormatted = getResources().getQuantityString(R.plurals.date_format, 1,selectedDate);
-        }
-        else if(dateDifference == 1) {
+        if (dateDifference == 0) {
+            selectedDateFormatted = getResources().getQuantityString(R.plurals.date_format, 1, selectedDate);
+        } else if (dateDifference == 1) {
             //TODO: FORMAT
-            selectedDateFormatted = getResources().getQuantityString(R.plurals.date_format, 2,selectedDate);
-        }
-        else {
+            selectedDateFormatted = getResources().getQuantityString(R.plurals.date_format, 2, selectedDate);
+        } else {
             //TODO FORMAT
-            selectedDateFormatted = getResources().getQuantityString(R.plurals.date_format, 3,selectedDate);
+            selectedDateFormatted = getResources().getQuantityString(R.plurals.date_format, 3, selectedDate);
         }
         return selectedDateFormatted;
     }
@@ -188,15 +198,53 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         // Add a marker in Sydney and move the camera
         LatLng indyairport = new LatLng(39.7168593, -86.29559519999998);
         LatLng sydney = new LatLng(-34, 151);
-        mMap.addMarker(new MarkerOptions().position(indyairport).title("Marker at airport"));
-        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(indyairport, 16));
+        //mMap.addMarker(new MarkerOptions().position(indyairport).title("Marker at airport"));
+        //mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(indyairport, 16));
+
+        DateTime now = new DateTime();
+        try {
+            DirectionsResult result = DirectionsApi.newRequest(getGeoContext())
+                    .mode(TravelMode.WALKING).origin("5500 Wabash Ave, Terre Haute, IN")
+                    .destination("1217 South Hanser Ln, Godfrey, IL").departureTime(now)
+                    .await();
+            Log.d("TAG", "DirectionsResult:  " + result);
+            addMarkersToMap(result, mMap);
+            addPolyline(result, mMap);
+        } catch (ApiException e) {
+            e.printStackTrace();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         //mMap.moveCamera(CameraUpdateFactory.newLatLng(indyairport));
         //mMap.moveCamera(CameraUpdateFactory.zoomTo((float) indyairport.latitude));
         //mMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
         //mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
     }
 
+    private void addMarkersToMap(DirectionsResult results, GoogleMap mMap) {
+        mMap.addMarker(new MarkerOptions().position(new LatLng(results.routes[0].legs[0].startLocation.lat, results.routes[0].legs[0].startLocation.lng)).title(results.routes[0].legs[0].startAddress));
+        mMap.addMarker(new MarkerOptions().position(new LatLng(results.routes[0].legs[0].endLocation.lat, results.routes[0].legs[0].endLocation.lng)).title(results.routes[0].legs[0].startAddress).snippet(getEndLocationTitle(results)));
+    }
 
+    private String getEndLocationTitle(DirectionsResult results) {
+        return "Time :" + results.routes[0].legs[0].duration.humanReadable + " Distance :" + results.routes[0].legs[0].distance.humanReadable;
+    }
+
+    private void addPolyline(DirectionsResult results, GoogleMap mMap) {
+        List<LatLng> decodedPath = PolyUtil.decode(results.routes[0].overviewPolyline.getEncodedPath());
+        mMap.addPolyline(new PolylineOptions().addAll(decodedPath));
+    }
+
+    private GeoApiContext getGeoContext() {
+        GeoApiContext geoApiContext = new GeoApiContext();
+        return geoApiContext.setQueryRateLimit(3)
+                .setApiKey(getString(R.string.google_maps_key))
+                .setConnectTimeout(1, TimeUnit.SECONDS)
+                .setReadTimeout(1, TimeUnit.SECONDS)
+                .setWriteTimeout(1, TimeUnit.SECONDS);
+    }
 
     @Override
     public void onSwipe() {
