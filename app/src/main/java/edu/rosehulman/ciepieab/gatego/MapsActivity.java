@@ -24,9 +24,11 @@ import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
+import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.maps.DirectionsApi;
+import com.google.maps.DirectionsApiRequest;
 import com.google.maps.GeoApiContext;
 import com.google.maps.android.PolyUtil;
 import com.google.maps.errors.ApiException;
@@ -55,6 +57,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private DateFormat mOtherDayFormatter;
     private ImageView mMenuButton;
 
+    private List<Route> mRoutes;
+
     private ArrayList<Airport> mAirports;
 
     @Override
@@ -66,7 +70,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 .findFragmentById(R.id.map_view);
         mapFragment.getMapAsync(this);
 
-        //mAirports = new ArrayList();
+        mRoutes = new ArrayList<Route>();
         mCalendar = Calendar.getInstance();
         mTodayTomorrowFormatter = new SimpleDateFormat("MM/dd/yy");
         mOtherDayFormatter = new SimpleDateFormat("E-MM/dd/yy");
@@ -126,6 +130,22 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 //TODO: get all input data, add route (model object) to mAirports
+                String airportKey = airportNameEditText.getText().toString();
+                String startGateLabel = startGateEditText.getText().toString();
+                String destGateLabel = destGateNameEditText.getText().toString();
+                String enteredDate = dateTextView.getText().toString();
+
+                //TODO: fetch gates from database
+                //TODO: REMOVE DUMMY VALUES
+                LatLng startCoord = new LatLng(39.7171641, -86.2974331);
+                LatLng destCoord = new LatLng(39.7150811, -86.2948602);
+
+                Route newRoute = new Route(enteredDate, startCoord, destCoord, airportKey);
+                mRoutes.add(newRoute);
+
+                drawRoute(newRoute);
+                zoomToRouteView(newRoute);
+
                 Snackbar snackbar = Snackbar.make(findViewById(R.id.map_view), getResources().getString(R.string.route_time), Snackbar.LENGTH_INDEFINITE);
                 snackbar.setAction("Start Navigation", new View.OnClickListener() {
                     @Override
@@ -139,6 +159,15 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         builder.setNegativeButton(android.R.string.cancel, null);
         builder.setView(view);
         builder.create().show();
+    }
+
+    private void zoomToRouteView(Route route) {
+        LatLngBounds.Builder builder = new LatLngBounds.Builder();
+        builder.include(route.getStartGate());
+        builder.include(route.getDestGate());
+        LatLngBounds bounds = builder.build();
+        CameraUpdate cu = CameraUpdateFactory.newLatLngBounds(bounds, 10);
+        mMap.animateCamera(cu);
     }
 
     @NonNull
@@ -199,13 +228,25 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         LatLng indyairport = new LatLng(39.7168593, -86.29559519999998);
         LatLng sydney = new LatLng(-34, 151);
         //mMap.addMarker(new MarkerOptions().position(indyairport).title("Marker at airport"));
-        //mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(indyairport, 16));
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(indyairport, 16));
 
+//        mMap.setIndoorEnabled(true);
+
+
+        //mMap.moveCamera(CameraUpdateFactory.newLatLng(indyairport));
+        //mMap.moveCamera(CameraUpdateFactory.zoomTo((float) indyairport.latitude));
+        //mMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
+        //mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
+    }
+
+    private void drawRoute(Route route) {
         DateTime now = new DateTime();
         try {
             DirectionsResult result = DirectionsApi.newRequest(getGeoContext())
-                    .mode(TravelMode.WALKING).origin("5500 Wabash Ave, Terre Haute, IN")
-                    .destination("1217 South Hanser Ln, Godfrey, IL").departureTime(now)
+                    .mode(TravelMode.WALKING)
+                    .origin(Double.toString(route.getStartGate().latitude) + "," + Double.toString(route.getStartGate().longitude))
+                    .destination(Double.toString(route.getDestGate().latitude) + "," + Double.toString(route.getDestGate().longitude))
+                    .departureTime(now)
                     .await();
             Log.d("TAG", "DirectionsResult:  " + result);
             addMarkersToMap(result, mMap);
@@ -217,10 +258,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         } catch (IOException e) {
             e.printStackTrace();
         }
-        //mMap.moveCamera(CameraUpdateFactory.newLatLng(indyairport));
-        //mMap.moveCamera(CameraUpdateFactory.zoomTo((float) indyairport.latitude));
-        //mMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
-        //mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
     }
 
     private void addMarkersToMap(DirectionsResult results, GoogleMap mMap) {

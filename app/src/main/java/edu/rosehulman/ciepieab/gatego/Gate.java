@@ -11,6 +11,7 @@ public class Gate {
     private LatLng coordinate;
     private String gateID;
     private String label;
+    private String airportKey;
 
     public Gate (){
 
