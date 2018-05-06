@@ -26,6 +26,7 @@ import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
 import com.google.maps.DirectionsApi;
 import com.google.maps.DirectionsApiRequest;
@@ -143,8 +144,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 Route newRoute = new Route(enteredDate, startCoord, destCoord, airportKey);
                 mRoutes.add(newRoute);
 
-                drawRoute(newRoute);
-                zoomToRouteView(newRoute);
+//                drawRoute(newRoute);
+//                zoomToRouteView(newRoute);
 
                 Snackbar snackbar = Snackbar.make(findViewById(R.id.map_view), getResources().getString(R.string.route_time), Snackbar.LENGTH_INDEFINITE);
                 snackbar.setAction("Start Navigation", new View.OnClickListener() {
@@ -235,8 +236,13 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         //mMap.moveCamera(CameraUpdateFactory.newLatLng(indyairport));
         //mMap.moveCamera(CameraUpdateFactory.zoomTo((float) indyairport.latitude));
-        //mMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
-        //mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
+        LatLng gateF9 = new LatLng(41.9736345, -87.9058268);
+        LatLng gateF6 = new LatLng(41.9743681, -87.9062536);
+        mMap.addMarker(new MarkerOptions().position(gateF9).title("Marker at Gate"));
+        mMap.addMarker(new MarkerOptions().position(gateF6).title("Gate F6"));
+        Polyline polyline = googleMap.addPolyline((new PolylineOptions())
+                .add(gateF6, gateF9));
+        mMap.moveCamera(CameraUpdateFactory.newLatLng(gateF9));
     }
 
     private void drawRoute(Route route) {
