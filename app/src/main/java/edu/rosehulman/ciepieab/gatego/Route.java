@@ -2,6 +2,8 @@ package edu.rosehulman.ciepieab.gatego;
 
 import com.google.android.gms.maps.model.LatLng;
 
+import java.util.List;
+
 /**
  * Created by reesemm on 4/23/2018.
  */
@@ -10,16 +12,17 @@ public class Route {
 
     private String routeID;
     private String date;
-    private String expirationDate;
-    private LatLng startGate;
-    private LatLng destGate;
-    private String airportKey;
+    private String startGateID;
+    private String destGateID;
+    private List<Double> latPolyPoints;
+    private List<Double> longPolyPoints;
 
-    public Route(String date, LatLng startGate, LatLng destGate, String airportKey) {
-        this.date = date;
-        this.startGate = startGate;
-        this.destGate = destGate;
-        this.airportKey = airportKey;
+    public Route(String date, String startGateID, String destGateID, List<Double> latPolyPoints, List<Double> longPolyPoint) {
+        //this.date = date;
+        this.startGateID = startGateID;
+        this.destGateID = destGateID;
+        this.latPolyPoints = latPolyPoints;
+        this.longPolyPoints = longPolyPoint;
     }
 
     public String getRouteID() {
@@ -38,35 +41,35 @@ public class Route {
         this.date = date;
     }
 
-    public String getExpirationDate() {
-        return expirationDate;
+    public String getStartGateID() {
+        return startGateID;
     }
 
-    public void setExpirationDate(String expirationDate) {
-        this.expirationDate = expirationDate;
+    public void setStartGateID(String startGateID) {
+        this.startGateID = startGateID;
     }
 
-    public LatLng getStartGate() {
-        return startGate;
+    public String getDestGateID() {
+        return destGateID;
     }
 
-    public void setStartGate(LatLng startGate) {
-        this.startGate = startGate;
+    public void setDestGateID(String destGateID) {
+        this.destGateID = destGateID;
     }
 
-    public LatLng getDestGate() {
-        return destGate;
+    public List<Double> getLatPolyPoints() {
+        return latPolyPoints;
     }
 
-    public void setDestGate(LatLng destGate) {
-        this.destGate = destGate;
+    public void setLatPolyPoints(List<Double> latPolyPoints) {
+        this.latPolyPoints = latPolyPoints;
     }
 
-    public String getAirportKey() {
-        return airportKey;
+    public List<Double> getLongPolyPoints() {
+        return longPolyPoints;
     }
 
-    public void setAirportKey(String airportKey) {
-        this.airportKey = airportKey;
+    public void setLongPolyPoints(List<Double> longPolyPoints) {
+        this.longPolyPoints = longPolyPoints;
     }
 }

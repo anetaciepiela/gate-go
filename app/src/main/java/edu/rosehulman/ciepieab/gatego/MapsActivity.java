@@ -88,6 +88,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private FirebaseAuth.AuthStateListener mAuthListener;
     private DatabaseReference mGateRef;
     private DatabaseReference mAirportRef;
+    private DatabaseReference mRouteRef;
+    private DatabaseReference mUserRoutesRef;
     private LoginFragment mLoginFragment;
     private GoogleApiClient mGoogleApiClient;
     private OnCompleteListener mOnCompleteListener;
@@ -106,35 +108,45 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         initializeListeners();
         setupGoogleSignIn();
 
-//        mAirportRef = FirebaseDatabase.getInstance().getReference().child("airport");
-//        mAirportRef.keepSynced(true);
-//
-//        mGateRef = FirebaseDatabase.getInstance().getReference().child("gate");
-//
-//        mRoutes = new ArrayList<Route>();
-//        mCalendar = Calendar.getInstance();
-//        mTodayTomorrowFormatter = new SimpleDateFormat("MM/dd/yy");
-//        mOtherDayFormatter = new SimpleDateFormat("E-MM/dd/yy");
-//
-//        addAirportEditText = findViewById(R.id.add_airport_editText);
-//        mMenuButton = findViewById(R.id.nearby_frag_butt);
-//
-//        addAirportEditText.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                //if (mAirports.size() == 0) {
-//                showAddAirportDialog();
-//                //}
-//            }
-//        });
-//
-//        mMenuButton.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                showNearbyFragment();
-//            }
-//        });
+        if (savedInstanceState == null) {
+            switchToLoginFragment();
+        }
 
+        mAirportRef = FirebaseDatabase.getInstance().getReference().child("airport");
+        mAirportRef.keepSynced(true);
+
+        mGateRef = FirebaseDatabase.getInstance().getReference().child("gate");
+        mGateRef.keepSynced(true);
+
+        mRouteRef = FirebaseDatabase.getInstance().getReference().child("route");
+        mRouteRef.keepSynced(true);
+
+        mUserRoutesRef = FirebaseDatabase.getInstance().getReference().child("user").child("routes");
+        mUserRoutesRef.keepSynced(true);
+
+        mRoutes = new ArrayList<Route>();
+        mCalendar = Calendar.getInstance();
+        mTodayTomorrowFormatter = new SimpleDateFormat("MM/dd/yy");
+        mOtherDayFormatter = new SimpleDateFormat("E-MM/dd/yy");
+
+        addAirportEditText = findViewById(R.id.add_airport_editText);
+        mMenuButton = findViewById(R.id.nearby_frag_butt);
+
+        addAirportEditText.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //if (mAirports.size() == 0) {
+                showAddAirportDialog();
+                //}
+            }
+        });
+
+        mMenuButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                showNearbyFragment();
+            }
+        });
     }
 
     private void setupGoogleSignIn() {
@@ -174,44 +186,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     mUserId = user.getUid();
                     isLoggedIn = true;
                     switchToMapsFragment();
-                    initializeFields();
                 }
                 else {
                     switchToLoginFragment();
                 }
             }
         };
-    }
-
-    private void initializeFields() {
-        mAirportRef = FirebaseDatabase.getInstance().getReference().child("airport");
-        mAirportRef.keepSynced(true);
-
-        mGateRef = FirebaseDatabase.getInstance().getReference().child("gate");
-
-        mRoutes = new ArrayList<Route>();
-        mCalendar = Calendar.getInstance();
-        mTodayTomorrowFormatter = new SimpleDateFormat("MM/dd/yy");
-        mOtherDayFormatter = new SimpleDateFormat("E-MM/dd/yy");
-
-        addAirportEditText = findViewById(R.id.add_airport_editText);
-        mMenuButton = findViewById(R.id.nearby_frag_butt);
-
-        addAirportEditText.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                //if (mAirports.size() == 0) {
-                showAddAirportDialog();
-                //}
-            }
-        });
-
-        mMenuButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                showNearbyFragment();
-            }
-        });
     }
 
     @Override
@@ -237,10 +217,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             ft.detach(mLoginFragment);
             ft.commit();
         }
-        else {
-            FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-            ft.commit();
-        }
+//        else {
+//            FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+//            ft.commit();
+//        }
         Log.d("TAG", "IN SWITCH TO MAPS FRAG");
     }
 
@@ -293,7 +273,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         final LinearLayout dateLayout = view.findViewById(R.id.date_layout);
         final TextView dateTextView = view.findViewById(R.id.date_text_view);
         final String todaysDate = mTodayTomorrowFormatter.format(mCalendar.getTime());
-        String defaultDate = getResources().getQuantityString(R.plurals.date_format, 1, todaysDate);
+        final String defaultDate = getResources().getQuantityString(R.plurals.date_format, 1, todaysDate);
         dateTextView.setText(defaultDate);
         dateLayout.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -313,13 +293,18 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 String destGateLabel = destGateNameEditText.getText().toString();
                 String enteredDate = dateTextView.getText().toString();
 
-                //TODO: fetch gates from database
-                //TODO: REMOVE DUMMY VALUES
-                LatLng startCoord = new LatLng(39.7171641, -86.2974331);
-                LatLng destCoord = new LatLng(39.7150811, -86.2948602);
+                String routeID = "R_" + airportKey + "_" + startGateLabel + "_" + destGateLabel;
 
-                Route newRoute = new Route(enteredDate, startCoord, destCoord, airportKey);
-                mRoutes.add(newRoute);
+                Query getRoute = mRouteRef.equalTo(routeID);
+                getRoute.addValueEventListener(new RouteValueEventListener());
+                //TODO:  add route to firebase under userID
+
+                //TODO: REMOVE DUMMY VALUES
+                //LatLng startCoord = new LatLng(39.7171641, -86.2974331);
+                //LatLng destCoord = new LatLng(39.7150811, -86.2948602);
+
+//                Route newRoute = new Route(enteredDate, startCoord, destCoord, airportKey);
+//                mRoutes.add(newRoute);
 
 //                drawRoute(newRoute);
 //                zoomToRouteView(newRoute);
@@ -341,8 +326,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     private void zoomToRouteView(Route route) {
         LatLngBounds.Builder builder = new LatLngBounds.Builder();
-        builder.include(route.getStartGate());
-        builder.include(route.getDestGate());
+        //builder.include(route.getStartGate());
+        //builder.include(route.getDestGate());
         LatLngBounds bounds = builder.build();
         CameraUpdate cu = CameraUpdateFactory.newLatLngBounds(bounds, 10);
         mMap.animateCamera(cu);
@@ -422,26 +407,26 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mMap.moveCamera(CameraUpdateFactory.newLatLng(gateF9));
     }
 
-    private void drawRoute(Route route) {
-        DateTime now = new DateTime();
-        try {
-            DirectionsResult result = DirectionsApi.newRequest(getGeoContext())
-                    .mode(TravelMode.WALKING)
-                    .origin(Double.toString(route.getStartGate().latitude) + "," + Double.toString(route.getStartGate().longitude))
-                    .destination(Double.toString(route.getDestGate().latitude) + "," + Double.toString(route.getDestGate().longitude))
-                    .departureTime(now)
-                    .await();
-            Log.d("TAG", "DirectionsResult:  " + result);
-            addMarkersToMap(result, mMap);
-            addPolyline(result, mMap);
-        } catch (ApiException e) {
-            e.printStackTrace();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
+//    private void drawRoute(Route route) {
+//        DateTime now = new DateTime();
+//        try {
+//            DirectionsResult result = DirectionsApi.newRequest(getGeoContext())
+//                    .mode(TravelMode.WALKING)
+//                    .origin(Double.toString(route.getStartGate().latitude) + "," + Double.toString(route.getStartGate().longitude))
+//                    .destination(Double.toString(route.getDestGate().latitude) + "," + Double.toString(route.getDestGate().longitude))
+//                    .departureTime(now)
+//                    .await();
+//            Log.d("TAG", "DirectionsResult:  " + result);
+//            addMarkersToMap(result, mMap);
+//            addPolyline(result, mMap);
+//        } catch (ApiException e) {
+//            e.printStackTrace();
+//        } catch (InterruptedException e) {
+//            e.printStackTrace();
+//        } catch (IOException e) {
+//            e.printStackTrace();
+//        }
+//    }
 
     private void addMarkersToMap(DirectionsResult results, GoogleMap mMap) {
         mMap.addMarker(new MarkerOptions().position(new LatLng(results.routes[0].legs[0].startLocation.lat, results.routes[0].legs[0].startLocation.lng)).title(results.routes[0].legs[0].startAddress));
@@ -541,6 +526,22 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             //AutoCompleteTextView airportAbbrText = findViewById(R.id.airport_name_editText);
             startGateAutoComplete.setAdapter(autoAdapter);
             destGateAutoComplete.setAdapter(autoAdapter);
+        }
+
+        @Override
+        public void onCancelled(DatabaseError databaseError) {
+
+        }
+    }
+
+    private class RouteValueEventListener implements ValueEventListener {
+        @Override
+        public void onDataChange(DataSnapshot dataSnapshot) {
+            //TODO: we're going to want to get a route from "route" and then create a route object.
+            //TODO: then push to userRoutesRef
+            if (dataSnapshot != null) {
+
+            }
         }
 
         @Override
