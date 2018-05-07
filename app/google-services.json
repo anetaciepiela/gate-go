@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "705942514011",
+    "firebase_url": "https://ciepieab-reesemm-gatego.firebaseio.com",
+    "project_id": "ciepieab-reesemm-gatego",
+    "storage_bucket": "ciepieab-reesemm-gatego.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:705942514011:android:461a4e519a5d2f18",
+        "android_client_info": {
+          "package_name": "edu.rosehulman.ciepieab.gatego"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "705942514011-a7k9iok999chk7pf0rla7l6omfhcdlpt.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "edu.rosehulman.ciepieab.gatego",
+            "certificate_hash": "7ac2a358c67b14045b83f2aa0bcba7a2bc5b814d"
+          }
+        },
+        {
+          "client_id": "705942514011-nvo2p2ik646kcj9nsp0bdjj403fbkd20.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAj9pVf65Pg-V2S5WKvXcSSAO4_-majF-4"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "705942514011-nvo2p2ik646kcj9nsp0bdjj403fbkd20.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -6,19 +6,19 @@
     android:layout_height="match_parent"
     android:gravity="top">
 
-    <EditText
+    <AutoCompleteTextView
         android:id="@+id/airport_name_editText"
         style="@style/TextBoxStyle"
         android:inputType="textPersonName"
         android:hint="@string/airport" />
 
-    <EditText
+    <AutoCompleteTextView
         android:id="@+id/start_gate_editText"
         style="@style/TextBoxStyle"
         android:inputType="textPersonName"
         android:hint="@string/start_gate" />
 
-    <EditText
+    <AutoCompleteTextView
         android:id="@+id/dest_gate_editText"
         style="@style/TextBoxStyle"
         android:inputType="textPersonName"

@@ -11,6 +11,7 @@ public class Airport {
     private LatLng coordinate;
     private String city;
     private String abbr;
+    private String name;
 
     public Airport() {
 

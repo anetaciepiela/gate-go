@@ -9,8 +9,11 @@ import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
+import android.text.InputType;
 import android.util.Log;
 import android.view.View;
+import android.widget.ArrayAdapter;
+import android.widget.AutoCompleteTextView;
 import android.widget.CalendarView;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -28,6 +31,12 @@ import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
+import com.google.firebase.database.ValueEventListener;
 import com.google.maps.DirectionsApi;
 import com.google.maps.DirectionsApiRequest;
 import com.google.maps.GeoApiContext;
@@ -57,10 +66,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private DateFormat mTodayTomorrowFormatter;
     private DateFormat mOtherDayFormatter;
     private ImageView mMenuButton;
-
     private List<Route> mRoutes;
 
-    private ArrayList<Airport> mAirports;
+    private DatabaseReference mGateRef;
+    private DatabaseReference mAirportRef;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -70,6 +79,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map_view);
         mapFragment.getMapAsync(this);
+        mAirportRef = FirebaseDatabase.getInstance().getReference().child("airport");
+        mAirportRef.keepSynced(true);
+
+        mAirportRef = FirebaseDatabase.getInstance().getReference().child("gate");
 
         mRoutes = new ArrayList<Route>();
         mCalendar = Calendar.getInstance();
@@ -110,9 +123,17 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         View view = getLayoutInflater().inflate(R.layout.dialog_add_airport, null, false);
         //TODO DATE TYPE
         //Capture widgets
-        final EditText airportNameEditText = view.findViewById(R.id.airport_name_editText);
-        final EditText startGateEditText = view.findViewById(R.id.start_gate_editText);
-        final EditText destGateNameEditText = view.findViewById(R.id.dest_gate_editText);
+        final AutoCompleteTextView airportNameEditText = view.findViewById(R.id.airport_name_editText);
+        airportNameEditText.setInputType(InputType.TYPE_TEXT_FLAG_CAP_SENTENCES);
+        mAirportRef.addValueEventListener(new AirportValueEventListener(airportNameEditText));
+
+        final AutoCompleteTextView startGateEditText = view.findViewById(R.id.start_gate_editText);
+        startGateEditText.setInputType(InputType.TYPE_TEXT_FLAG_CAP_SENTENCES);
+        final AutoCompleteTextView destGateNameEditText = view.findViewById(R.id.dest_gate_editText);
+        destGateNameEditText.setInputType(InputType.TYPE_TEXT_FLAG_CAP_SENTENCES);
+        Query gatesByAirport = mGateRef.orderByChild("airportKey").equalTo(airportNameEditText.getText().toString());
+        gatesByAirport.addValueEventListener(new GateValueEventListener(startGateEditText, destGateNameEditText));
+
         final LinearLayout dateLayout = view.findViewById(R.id.date_layout);
         final TextView dateTextView = view.findViewById(R.id.date_text_view);
         final String todaysDate = mTodayTomorrowFormatter.format(mCalendar.getTime());
@@ -295,5 +316,64 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         FragmentTransaction ft = fm.beginTransaction();
         fm.popBackStackImmediate();
         ft.commit();
+    }
+
+
+    private class AirportValueEventListener implements ValueEventListener {
+
+        AutoCompleteTextView airportAutoComplete;
+
+        public AirportValueEventListener(AutoCompleteTextView airportNameEditText) {
+            airportAutoComplete = airportNameEditText;
+        }
+
+        @Override
+        public void onDataChange(DataSnapshot dataSnapshot) {
+            final List<String> mAirports = new ArrayList<String>();
+
+            for (DataSnapshot airportSnapshot : dataSnapshot.getChildren()) {
+                String airportAbbr = airportSnapshot.child("abbreviation").getValue().toString();
+                mAirports.add(airportAbbr);
+            }
+            ArrayAdapter<String> autoAdapter = new ArrayAdapter<String>(MapsActivity.this, android.R.layout.simple_list_item_1, mAirports);
+            //AutoCompleteTextView airportAbbrText = findViewById(R.id.airport_name_editText);
+            airportAutoComplete.setAdapter(autoAdapter);
+        }
+
+        @Override
+        public void onCancelled(DatabaseError databaseError) {
+
+        }
+    }
+
+    private class GateValueEventListener implements ValueEventListener {
+
+        private AutoCompleteTextView startGateAutoComplete;
+        private AutoCompleteTextView destGateAutoComplete;
+
+        public GateValueEventListener(AutoCompleteTextView startGateEditText, AutoCompleteTextView destGateNameEditText) {
+            startGateAutoComplete = startGateEditText;
+            destGateAutoComplete = destGateNameEditText;
+        }
+
+        @Override
+        public void onDataChange(DataSnapshot dataSnapshot) {
+            final List<String> mGates = new ArrayList<String>();
+
+            for (DataSnapshot gateSnapshot : dataSnapshot.getChildren()) {
+
+                String gateLabel = gateSnapshot.child("label").getValue().toString();
+                mGates.add(gateLabel);
+            }
+            ArrayAdapter<String> autoAdapter = new ArrayAdapter<String>(MapsActivity.this, android.R.layout.simple_list_item_1, mGates);
+            //AutoCompleteTextView airportAbbrText = findViewById(R.id.airport_name_editText);
+            startGateAutoComplete.setAdapter(autoAdapter);
+            destGateAutoComplete.setAdapter(autoAdapter);
+        }
+
+        @Override
+        public void onCancelled(DatabaseError databaseError) {
+
+        }
     }
 }
