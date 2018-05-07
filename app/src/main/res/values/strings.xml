@@ -19,4 +19,12 @@
     <string name="coffee">Coffee</string>
     <string name="shopping">Shopping</string>
     <string name="nearby_title">Show nearby...</string>
+    <string name="next">next</string>
+    <string name="prompt_email">Email</string>
+    <string name="prompt_password">Password</string>
+    <string name="action_sign_in">Login</string>
+    <string name="invalid_password">Invalid password</string>
+    <string name="field_required">Field required</string>
+    <string name="invalid_email">Invalid email</string>
+
 </resources>

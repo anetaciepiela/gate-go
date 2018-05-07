@@ -5,4 +5,5 @@
     <color name="colorAccent">#FF4081</color>
     <color name="editTextBackground">#FFE</color>
     <color name="borderColor">#aaa</color>
+    <color name="white">#FFF</color>
 </resources>

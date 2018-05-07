@@ -15,6 +15,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "705942514011-m959e7rpf27c0hstt083rfmuvjfq1uqt.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "edu.rosehulman.ciepieab.gatego",
+            "certificate_hash": "30c598b46db19d6ae92e38caea8ba4e5b442f1ec"
+          }
+        },
+        {
           "client_id": "705942514011-a7k9iok999chk7pf0rla7l6omfhcdlpt.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {

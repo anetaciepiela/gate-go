@@ -1,7 +1,9 @@
 package edu.rosehulman.ciepieab.gatego;
 
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.Intent;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.content.DialogInterface;
@@ -21,6 +23,12 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.support.design.widget.Snackbar;
 
+import com.google.android.gms.auth.api.Auth;
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
+import com.google.android.gms.auth.api.signin.GoogleSignInResult;
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.maps.CameraUpdate;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
@@ -31,6 +39,11 @@ import com.google.android.gms.maps.model.LatLngBounds;
 import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.gms.maps.model.Polyline;
 import com.google.android.gms.maps.model.PolylineOptions;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.firebase.auth.AuthCredential;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.auth.GoogleAuthProvider;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -57,8 +70,9 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 
 import static java.lang.Math.abs;
+import static java.lang.Math.log1p;
 
-public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, NearbyFragment.OnSwipeListener {
+public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, NearbyFragment.OnSwipeListener, GoogleApiClient.OnConnectionFailedListener, LoginFragment.OnLoginListener {
 
     private GoogleMap mMap;
     private EditText addAirportEditText;
@@ -67,9 +81,17 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private DateFormat mOtherDayFormatter;
     private ImageView mMenuButton;
     private List<Route> mRoutes;
+    private String mUserId;
+    private boolean isLoggedIn;
 
+    private FirebaseAuth mAuth;
+    private FirebaseAuth.AuthStateListener mAuthListener;
     private DatabaseReference mGateRef;
     private DatabaseReference mAirportRef;
+    private LoginFragment mLoginFragment;
+    private GoogleApiClient mGoogleApiClient;
+    private OnCompleteListener mOnCompleteListener;
+    private static final int RC_GOOGLE_LOGIN = 1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -79,10 +101,93 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map_view);
         mapFragment.getMapAsync(this);
+
+        mAuth = FirebaseAuth.getInstance();
+        initializeListeners();
+        setupGoogleSignIn();
+
+//        mAirportRef = FirebaseDatabase.getInstance().getReference().child("airport");
+//        mAirportRef.keepSynced(true);
+//
+//        mGateRef = FirebaseDatabase.getInstance().getReference().child("gate");
+//
+//        mRoutes = new ArrayList<Route>();
+//        mCalendar = Calendar.getInstance();
+//        mTodayTomorrowFormatter = new SimpleDateFormat("MM/dd/yy");
+//        mOtherDayFormatter = new SimpleDateFormat("E-MM/dd/yy");
+//
+//        addAirportEditText = findViewById(R.id.add_airport_editText);
+//        mMenuButton = findViewById(R.id.nearby_frag_butt);
+//
+//        addAirportEditText.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                //if (mAirports.size() == 0) {
+//                showAddAirportDialog();
+//                //}
+//            }
+//        });
+//
+//        mMenuButton.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                showNearbyFragment();
+//            }
+//        });
+
+    }
+
+    private void setupGoogleSignIn() {
+        GoogleSignInOptions gso = new GoogleSignInOptions
+                .Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                .requestIdToken(getString(R.string.default_web_client_id))
+                .requestEmail()
+                .build();
+        mGoogleApiClient = new GoogleApiClient
+                .Builder(this)
+                .enableAutoManage(this, this)
+                .addApi(Auth.GOOGLE_SIGN_IN_API, gso)
+                .build();
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        mAuth.addAuthStateListener(mAuthListener);
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        if(mAuthListener != null) {
+            mAuth.removeAuthStateListener(mAuthListener);
+        }
+    }
+
+    private void initializeListeners() {
+        mAuthListener = new FirebaseAuth.AuthStateListener() {
+            @Override
+            public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
+                FirebaseUser user = firebaseAuth.getCurrentUser();
+                Log.d("TAG", "USER LOGIN");
+                if(user != null) {
+                    mUserId = user.getUid();
+                    isLoggedIn = true;
+                    switchToMapsFragment();
+                    initializeFields();
+                }
+                else {
+                    switchToLoginFragment();
+                }
+            }
+        };
+    }
+
+    private void initializeFields() {
         mAirportRef = FirebaseDatabase.getInstance().getReference().child("airport");
         mAirportRef.keepSynced(true);
 
-        mAirportRef = FirebaseDatabase.getInstance().getReference().child("gate");
+        mGateRef = FirebaseDatabase.getInstance().getReference().child("gate");
 
         mRoutes = new ArrayList<Route>();
         mCalendar = Calendar.getInstance();
@@ -107,7 +212,43 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 showNearbyFragment();
             }
         });
+    }
 
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        if(resultCode == Activity.RESULT_OK) {
+            if(requestCode == RC_GOOGLE_LOGIN) {
+                GoogleSignInResult result = Auth.GoogleSignInApi.getSignInResultFromIntent(data);
+                if(result.isSuccess()) {
+                    GoogleSignInAccount account = result.getSignInAccount();
+                    AuthCredential credential = GoogleAuthProvider.getCredential(account.getIdToken(), null);
+                    mAuth.signInWithCredential(credential).addOnCompleteListener(this, mOnCompleteListener);
+                }
+                else {
+                    Log.d("LOGIN ERROR", "Google authentication failed");
+                }
+            }
+        }
+    }
+
+    private void switchToMapsFragment() {
+        if(isLoggedIn) {
+            FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+            ft.detach(mLoginFragment);
+            ft.commit();
+        }
+        else {
+            FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+            ft.commit();
+        }
+        Log.d("TAG", "IN SWITCH TO MAPS FRAG");
+    }
+
+    private void switchToLoginFragment() {
+        FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
+        mLoginFragment = new LoginFragment();
+        ft.replace(R.id.map_view, mLoginFragment, "Login");
+        ft.commit();
     }
 
     private void showNearbyFragment() {
@@ -117,21 +258,36 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         ft.commit();
     }
 
-    @SuppressLint("ResourceType")
-    private void showAddAirportDialog() {
+    public void showAddAirportDialog() {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         View view = getLayoutInflater().inflate(R.layout.dialog_add_airport, null, false);
-        //TODO DATE TYPE
-        //Capture widgets
         final AutoCompleteTextView airportNameEditText = view.findViewById(R.id.airport_name_editText);
         airportNameEditText.setInputType(InputType.TYPE_TEXT_FLAG_CAP_SENTENCES);
         mAirportRef.addValueEventListener(new AirportValueEventListener(airportNameEditText));
+        builder.setTitle("Add Airport");
+        builder.setPositiveButton(getResources().getString(R.string.next), new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                String airportKey = airportNameEditText.getText().toString();
+                showAddRouteDialog(airportKey);
+            }
+        });
+        builder.setNegativeButton(android.R.string.cancel, null);
+        builder.setView(view);
+        builder.create().show();
+    }
 
+    @SuppressLint("ResourceType")
+    private void showAddRouteDialog(final String airportKey) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        View view = getLayoutInflater().inflate(R.layout.dialog_add_route, null, false);
+        //TODO DATE TYPE
+        //Capture widgets
         final AutoCompleteTextView startGateEditText = view.findViewById(R.id.start_gate_editText);
         startGateEditText.setInputType(InputType.TYPE_TEXT_FLAG_CAP_SENTENCES);
         final AutoCompleteTextView destGateNameEditText = view.findViewById(R.id.dest_gate_editText);
         destGateNameEditText.setInputType(InputType.TYPE_TEXT_FLAG_CAP_SENTENCES);
-        Query gatesByAirport = mGateRef.orderByChild("airportKey").equalTo(airportNameEditText.getText().toString());
+        Query gatesByAirport = mGateRef.orderByChild("airportKey").equalTo(airportKey);
         gatesByAirport.addValueEventListener(new GateValueEventListener(startGateEditText, destGateNameEditText));
 
         final LinearLayout dateLayout = view.findViewById(R.id.date_layout);
@@ -148,11 +304,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 //dateTextView.setText(selectedFormattedDate);
             }
         });
+        builder.setTitle("Enter Your Gate Information");
         builder.setPositiveButton(R.string.save, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 //TODO: get all input data, add route (model object) to mAirports
-                String airportKey = airportNameEditText.getText().toString();
                 String startGateLabel = startGateEditText.getText().toString();
                 String destGateLabel = destGateNameEditText.getText().toString();
                 String enteredDate = dateTextView.getText().toString();
@@ -316,6 +472,22 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         FragmentTransaction ft = fm.beginTransaction();
         fm.popBackStackImmediate();
         ft.commit();
+    }
+
+    @Override
+    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
+        Log.d("ERROR", "Connection to Google failed");
+    }
+
+    @Override
+    public void onLogin(String email, String password) {
+        mAuth.signInWithEmailAndPassword(email, password).addOnCompleteListener(mOnCompleteListener);
+    }
+
+    @Override
+    public void onGoogleLogin() {
+        Intent intent = Auth.GoogleSignInApi.getSignInIntent(mGoogleApiClient);
+        startActivityForResult(intent, RC_GOOGLE_LOGIN);
     }
 
 

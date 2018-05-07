@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:gravity="top">
+
+    <AutoCompleteTextView
+        android:id="@+id/start_gate_editText"
+        style="@style/TextBoxStyle"
+        android:inputType="textPersonName"
+        android:hint="@string/start_gate" />
+
+    <AutoCompleteTextView
+        android:id="@+id/dest_gate_editText"
+        style="@style/TextBoxStyle"
+        android:inputType="textPersonName"
+        android:hint="@string/destination_gate" />
+
+    <LinearLayout
+        android:id="@+id/date_layout"
+        style="@style/TextBoxStyle"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/date_text_view"
+            android:layout_width="215dp"
+            android:layout_height="match_parent"
+            android:layout_alignParentLeft="true"
+            android:layout_gravity="left"
+            android:textAlignment="center"
+            android:gravity="center_vertical"
+            android:text="Button"
+            android:textSize="18sp" />
+
+        <ImageView
+            android:id="@+id/imageView"
+            android:layout_width="40dp"
+            android:layout_height="wrap_content"
+            android:src="@drawable/ic_date_range_black_24dp" />
+
+    </LinearLayout>
+
+</LinearLayout>
