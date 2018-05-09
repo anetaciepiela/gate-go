@@ -1,0 +1,576 @@
+{
+  "airport" : {
+    "IND" : {
+      "abbreviation" : "IND",
+      "city" : "Indianapolis",
+      "latitude" : 39.7169,
+      "longitude" : -86.2956,
+      "name" : "Indianapolis International Airport"
+    },
+    "ORD" : {
+      "abbreviation" : "ORD",
+      "city" : "Chicago",
+      "latitude" : 41.9742,
+      "longitude" : -87.9073,
+      "name" : "O'Hare International Airport"
+    }
+  },
+  "gate" : {
+    "ORD_E1" : {
+      "airportKey" : "ORD",
+      "gateID" : "ORD_E1",
+      "label" : "E1",
+      "latitude" : 41.9761495,
+      "longitude" : -87.9055374
+    },
+    "ORD_E10" : {
+      "airportKey" : "ORD",
+      "gateID" : "ORD_E10",
+      "label" : "E10",
+      "latitude" : 41.9748105,
+      "longitude " : -87.9085931
+    },
+    "ORD_E11" : {
+      "airportKey" : "ORD",
+      "gateID" : "ORD_E11",
+      "label" : "E11",
+      "latitude" : 41.9746408,
+      "longitude " : -87.9086159
+    },
+    "ORD_E12" : {
+      "airportKey" : "ORD",
+      "gateID" : "ORD_E12",
+      "label" : "E12",
+      "latitude" : 41.97473,
+      "longitude " : -87.9088741
+    },
+    "ORD_E13" : {
+      "airportKey" : "ORD",
+      "gateID" : "ORD_E13",
+      "label" : "E13",
+      "latitude" : 41.9745802,
+      "longitude " : -87.9088255
+    },
+    "ORD_E14" : {
+      "airportKey" : "ORD",
+      "gateID" : "ORD_E14",
+      "label" : "E14",
+      "latitude" : 41.974658,
+      "longitude " : -87.9090954
+    },
+    "ORD_E15" : {
+      "airportKey" : "ORD",
+      "gateID" : "ORD_E15",
+      "label" : "E15",
+      "latitude" : 41.9745374,
+      "longitude " : -87.9090437
+    },
+    "ORD_E2" : {
+      "airportKey" : "ORD",
+      "gateID" : "ORD_E2",
+      "label" : "E2",
+      "latitude" : 41.9758475,
+      "longitude" : -87.9058224
+    },
+    "ORD_E3" : {
+      "airportKey" : "ORD",
+      "gateID" : "ORD_E3",
+      "label" : "E3",
+      "latitude" : 41.9753594,
+      "longitude" : -87.9065992
+    },
+    "ORD_E4" : {
+      "airportKey" : "ORD",
+      "gateID" : "ORD_E4",
+      "label" : "E4",
+      "latitude" : 41.9752345,
+      "longitude " : -87.9070639
+    },
+    "ORD_E6" : {
+      "airportKey" : "ORD",
+      "gateID" : "ORD_E6",
+      "label" : "E6",
+      "latitude" : 41.9750987,
+      "longitude " : -87.9075011
+    },
+    "ORD_E7" : {
+      "airportKey" : "ORD",
+      "gateID" : "ORD_E7",
+      "label" : "E7",
+      "latitude" : 41.9748534,
+      "longitude" : -87.907825
+    },
+    "ORD_E8" : {
+      "airportKey" : "ORD",
+      "gateID" : "ORD_E8",
+      "label" : "E8",
+      "latitude" : 41.9749352,
+      "longitude " : -87.9081294
+    },
+    "ORD_E9" : {
+      "airportKey" : "ORD",
+      "gateID" : "ORD_E9",
+      "label" : "E9",
+      "latitude" : 41.9747871,
+      "longitude" : -87.9080855
+    },
+    "ORD_F1" : {
+      "airportKey" : "ORD",
+      "gateID" : "ORD_F1",
+      "label" : "F1",
+      "latitude" : 41.9760538,
+      "longitude" : -87.9053500
+    },
+    "ORD_F5" : {
+      "airportKey" : "ORD",
+      "gateID" : "ORD_F5",
+      "label" : "F5",
+      "latitude" : 41.9744940,
+      "longitude" : -87.9059542
+    },
+    "ORD_F7" : {
+      "airportKey" : "ORD",
+      "gateID" : "ORD_F7",
+      "label" : "F7",
+      "latitude" : 41.9737774,
+      "longitude" : -87.9059575
+    },
+    "ORD_F9" : {
+      "airportKey" : "ORD",
+      "gateID" : "ORD_F9",
+      "label" : "F9",
+      "latitude" : 41.9736281,
+      "longitude" : -87.9059625
+    },
+    "ORD_F14" : {
+      "airportKey" : "ORD",
+      "gateID" : "ORD_F14",
+      "label" : "F14",
+      "latitude" : 41.9731019,
+      "longitude" : -87.9060967
+    },
+    "ORD_F12" : {
+      "airportKey" : "ORD",
+      "gateID" : "ORD_F12",
+      "label" : "F12",
+      "latitude" : 41.9733103,
+      "longitude" : -87.9061855
+    },
+    "ORD_F10" : {
+      "airportKey" : "ORD",
+      "gateID" : "ORD_F10",
+      "label" : "F10",
+      "latitude" : 41.9737734,
+      "longitude" : -87.9061858
+    },
+    "ORD_F8" : {
+      "airportKey" : "ORD",
+      "gateID" : "ORD_F8",
+      "label" : "F8",
+      "latitude" : 41.9740109,
+      "longitude" : -87.9061815
+    },
+    "ORD_F6" : {
+      "airportKey" : "ORD",
+      "gateID" : "ORD_F6",
+      "label" : "F6",
+      "latitude" : 41.9743404,
+      "longitude" : -87.9061664
+    },
+    "ORD_F4" : {
+      "airportKey" : "ORD",
+      "gateID" : "ORD_F4",
+      "label" : "F4",
+      "latitude" : 41.9746560,
+      "longitude" : -87.9059498
+    },
+    "ORD_B1" : {
+      "airportKey" : "ORD",
+      "gateID" : "ORD_B1",
+      "label" : "B1",
+      "latitude" : 41.9770473,
+      "longitude" : -87.9070475
+    },
+    "ORD_B2" : {
+      "airportKey" : "ORD",
+      "gateID" : "ORD_B2",
+      "label" : "B2",
+      "latitude" : 41.9770316,
+      "longitude" : -87.9073952
+    },
+    "ORD_B3" : {
+      "airportKey" : "ORD",
+      "gateID" : "ORD_B3",
+      "label" : "B3",
+      "latitude" : 41.9770910,
+      "longitude" : -87.9073952
+    },
+    "ORD_B4" : {
+      "airportKey" : "ORD",
+      "gateID" : "ORD_B4",
+      "label" : "B4",
+      "latitude" : 41.9773038,
+      "longitude" : -87.9073449
+    },
+    "ORD_B5" : {
+      "airportKey" : "ORD",
+      "gateID" : "ORD_B5",
+      "label" : "B5",
+      "latitude" : 41.9775748,
+      "longitude" : -87.9072822
+    },
+    "ORD_B6" : {
+      "airportKey" : "ORD",
+      "gateID" : "ORD_B6",
+      "label" : "B6",
+      "latitude" : 41.9779254,
+      "longitude" : -87.9072027
+    },
+    "ORD_B7" : {
+      "airportKey" : "ORD",
+      "gateID" : "ORD_B7",
+      "label" : "B7",
+      "latitude" : 41.9784449,
+      "longitude" : -87.9070854
+    },
+    "ORD_B8" : {
+      "airportKey" : "ORD",
+      "gateID" : "ORD_B8",
+      "label" : "B8",
+      "latitude" : 41.9788773,
+      "longitude" : -87.9069895
+    },
+    "ORD_B9" : {
+      "airportKey" : "ORD",
+      "gateID" : "ORD_B9",
+      "label" : "B9",
+      "latitude" : 41.9794408,
+      "longitude" : -87.9068571
+    },
+    "ORD_B10" : {
+      "airportKey" : "ORD",
+      "gateID" : "ORD_B10",
+      "label" : "B10",
+      "latitude" : 41.9799059,
+      "longitude" : -87.9067521
+    },
+    "ORD_B11" : {
+      "airportKey" : "ORD",
+      "gateID" : "ORD_B11",
+      "label" : "B11",
+      "latitude" : 41.9801716,
+      "longitude" : -87.9066918
+    },
+    "ORD_B12" : {
+      "airportKey" : "ORD",
+      "gateID" : "ORD_B12",
+      "label" : "B12",
+      "latitude" : 41.9804425,
+      "longitude" : -87.9066274
+    },
+    "ORD_B14" : {
+      "airportKey" : "ORD",
+      "gateID" : "ORD_B14",
+      "label" : "B14",
+      "latitude" : 41.9809839,
+      "longitude" : -87.9065037
+    },
+    "ORD_B15" : {
+      "airportKey" : "ORD",
+      "gateID" : "ORD_B15",
+      "label" : "B15",
+      "latitude" : 41.9811997,
+      "longitude" : -87.9064541
+    },
+    "ORD_B16" : {
+      "airportKey" : "ORD",
+      "gateID" : "ORD_B16",
+      "label" : "B16",
+      "latitude" : 41.9814960,
+      "longitude" : -87.9063810
+    },
+    "ORD_B17" : {
+      "airportKey" : "ORD",
+      "gateID" : "ORD_B17",
+      "label" : "B17",
+      "latitude" : 41.9815578,
+      "longitude" : -87.9062680
+    },
+    "ORD_B18" : {
+      "airportKey" : "ORD",
+      "gateID" : "ORD_B18",
+      "label" : "B18",
+      "latitude" : 41.9814848,
+      "longitude" : -87.9060638
+    },
+    "ORD_B19" : {
+      "airportKey" : "ORD",
+      "gateID" : "ORD_B19",
+      "label" : "B19",
+      "latitude" : 41.9815760,
+      "longitude" : -87.9054794
+    },
+    "ORD_B20" : {
+      "airportKey" : "ORD",
+      "gateID" : "ORD_B20",
+      "label" : "B20",
+      "latitude" : 41.9817811,
+      "longitude" : -87.9049735
+    },
+    "ORD_B21" : {
+      "airportKey" : "ORD",
+      "gateID" : "ORD_B21",
+      "label" : "B21",
+      "latitude" : 41.9818385,
+      "longitude" : -87.9045708
+    },
+    "ORD_B22" : {
+      "airportKey" : "ORD",
+      "gateID" : "ORD_B22",
+      "label" : "B22",
+      "latitude" : 41.9818113,
+      "longitude" : -87.9045611
+    },
+    "ORD_C2" : {
+      "airportKey" : "ORD",
+      "gateID" : "ORD_C2",
+      "label" : "C2",
+      "latitude" : 41.9767086,
+      "longitude" : -87.9108100
+    },
+    "ORD_C4" : {
+      "airportKey" : "ORD",
+      "gateID" : "ORD_C4",
+      "label" : "C4",
+      "latitude" : 41.9767859,
+      "longitude" : -87.9108670
+    },
+    "ORD_C6" : {
+      "airportKey" : "ORD",
+      "gateID" : "ORD_C6",
+      "label" : "C6",
+      "latitude" : 41.9770085,
+      "longitude" : -87.9108351
+    },
+    "ORD_C8" : {
+      "airportKey" : "ORD",
+      "gateID" : "ORD_C8",
+      "label" : "C8",
+      "latitude" : 41.9772253,
+      "longitude" : -87.9107831
+    },
+    "ORD_C10" : {
+      "airportKey" : "ORD",
+      "gateID" : "ORD_C10",
+      "label" : "C10",
+      "latitude" : 41.9776555,
+      "longitude" : -87.9106846
+    },
+    "ORD_C12" : {
+      "airportKey" : "ORD",
+      "gateID" : "ORD_C12",
+      "label" : "C12",
+      "latitude" : 41.9779608,
+      "longitude" : -87.9106135
+    },
+    "ORD_C16" : {
+      "airportKey" : "ORD",
+      "gateID" : "ORD_C16",
+      "label" : "C16",
+      "latitude" : 41.9783499,
+      "longitude" : -87.9107764
+    },
+    "ORD_C15" : {
+      "airportKey" : "ORD",
+      "gateID" : "ORD_C15",
+      "label" : "C15",
+      "latitude" : 41.9780959,
+      "longitude" : -87.9101900
+    },
+    "ORD_C17" : {
+      "airportKey" : "ORD",
+      "gateID" : "ORD_C17",
+      "label" : "C17",
+      "latitude" : 41.9784613,
+      "longitude" : -87.9101106
+    },
+    "ORD_C18" : {
+      "airportKey" : "ORD",
+      "gateID" : "ORD_C18",
+      "label" : "C18",
+      "latitude" : 41.9789837,
+      "longitude" : -87.9106232
+    },
+    "ORD_C19" : {
+      "airportKey" : "ORD",
+      "gateID" : "ORD_C19",
+      "label" : "C19",
+      "latitude" : 41.9791555,
+      "longitude" : -87.9099513
+    },
+    "ORD_C20" : {
+      "airportKey" : "ORD",
+      "gateID" : "ORD_C20",
+      "label" : "C20",
+      "latitude" : 41.9795321,
+      "longitude" : -87.9104995
+    },
+    "ORD_C3" : {
+      "airportKey" : "ORD",
+      "gateID" : "ORD_C3",
+      "label" : "C3",
+      "latitude" : 41.9766854,
+      "longitude" : -87.9105937
+    },
+    "ORD_C5" : {
+      "airportKey" : "ORD",
+      "gateID" : "ORD_C5",
+      "label" : "C5",
+      "latitude" : 41.9767485,
+      "longitude" : -87.9105096
+    },
+    "ORD_C7" : {
+      "airportKey" : "ORD",
+      "gateID" : "ORD_C7",
+      "label" : "C7",
+      "latitude" : 41.9768522,
+      "longitude" : -87.9104794
+    },
+    "ORD_C9" : {
+      "airportKey" : "ORD",
+      "gateID" : "ORD_C9",
+      "label" : "C9",
+      "latitude" : 41.9770892,
+      "longitude" : -87.9104271
+    },
+    "ORD_C11" : {
+      "airportKey" : "ORD",
+      "gateID" : "ORD_C11",
+      "label" : "C11",
+      "latitude" : 41.9775780,
+      "longitude" : -87.9103124
+    },
+    "ORD_C21" : {
+      "airportKey" : "ORD",
+      "gateID" : "ORD_C21",
+      "label" : "C21",
+      "latitude" : 41.9796111,
+      "longitude" : -87.9098511
+    },
+    "ORD_C23" : {
+      "airportKey" : "ORD",
+      "gateID" : "ORD_C23",
+      "label" : "C23",
+      "latitude" : 41.9800891,
+      "longitude" : -87.9097461
+    },
+    "ORD_C24" : {
+      "airportKey" : "ORD",
+      "gateID" : "ORD_C24",
+      "label" : "C24",
+      "latitude" : 41.9802324,
+      "longitude" : -87.9100945
+    },
+    "ORD_C22" : {
+      "airportKey" : "ORD",
+      "gateID" : "ORD_C22",
+      "label" : "C22",
+      "latitude" : 41.9799271,
+      "longitude" : -87.9101619
+    },
+    "ORD_C25" : {
+      "airportKey" : "ORD",
+      "gateID" : "ORD_C25",
+      "label" : "C25",
+      "latitude" : 41.9805283,
+      "longitude" : -87.9096395
+    },
+    "ORD_C26" : {
+      "airportKey" : "ORD",
+      "gateID" : "ORD_C26",
+      "label" : "C26",
+      "latitude" : 41.9805798,
+      "longitude" : -87.9100187
+    },
+    "ORD_C27" : {
+      "airportKey" : "ORD",
+      "gateID" : "ORD_C27",
+      "label" : "C27",
+      "latitude" : 41.9807742,
+      "longitude" : -87.9095899
+    },
+    "ORD_C28" : {
+      "airportKey" : "ORD",
+      "gateID" : "ORD_C28",
+      "label" : "C28",
+      "latitude" : 41.9808209,
+      "longitude" : -87.9099587
+    },
+    "ORD_C29" : {
+      "airportKey" : "ORD",
+      "gateID" : "ORD_C29",
+      "label" : "C29",
+      "latitude" : 41.9809674,
+      "longitude" : -87.9096204
+    },
+    "ORD_C30" : {
+      "airportKey" : "ORD",
+      "gateID" : "ORD_C30",
+      "label" : "C30",
+      "latitude" : 41.9809335,
+      "longitude" : -87.9099268
+    },
+    "ORD_C31" : {
+      "airportKey" : "ORD",
+      "gateID" : "ORD_C31",
+      "label" : "C31",
+      "latitude" : 41.9810065,
+      "longitude" : -87.9097237
+    },
+    "ORD_C32" : {
+      "airportKey" : "ORD",
+      "gateID" : "ORD_C32",
+      "label" : "C32",
+      "latitude" : 41.9809971,
+      "longitude" : -87.9098407
+    }
+  },
+  "route" : {
+    "R_ORD_E1_E10" : {
+      "destGateID" : "ORD_E10",
+      "latPolyPoint" : [ 41.9761495, 41.9757983, 41.9753821, 41.9747323, 41.9748105 ],
+      "longPolyPoint" : [ -87.9055374, -87.9057483, -87.9061107, -87.9085485, -87.9085931 ],
+      "startGateID" : "ORD_E1"
+    },
+    "R_ORD_F9_E15" : {
+      "destGateID" : "ORD_E15",
+      "latPolyPoint" : [ 41.9736281, 41.9736443, 41.9746443, 41.9751468, 41.9746007, 41.9745374],
+      "longPolyPoint" : [ -87.9059625, -87.9060524, -87.9060343, -87.9070344, -87.9090793, -87.9090437],
+      "startGateID" : "ORD_F1"
+    },
+    "R_ORD_B19_B5" : {
+      "destGateID" : "ORD_B5",
+      "latPolyPoint" : [ 41.9815760, 41.9815224, 41.9813325, 41.9814280, 41.9775643, 41.9775748],
+      "longPolyPoint" : [ -87.9054794, -87.9054023, -87.9056206, -87.9062358, -87.9071648, -87.9072822],
+      "startGateID" : "ORD_B19"
+    }
+  },
+  "user" : {
+    "jelwcOFVVYSWgkyIOhozecvdLBB3" : {
+      "routes" : {
+        "-LC20T617vKJE6DVM7j9" : {
+          "destGateID" : "ORD_E10",
+          "latPolyPoint" : [ 41.9761495, 41.9757983, 41.9753821, 41.9747323, 41.9748105 ],
+          "longPolyPoint" : [ -87.9055374, -87.9057483, -87.9061107, -87.9085485, -87.9085931 ],
+          "routeID" : "R_ORD_E1_E10",
+          "startGateID" : "ORD_E1"
+        },
+        "-LC5YgFNSqbnFEBJL2Qp" : {
+          "destGateID" : "ORD_E12",
+          "routeID" : "R_ORD_E2_E12",
+          "startGateID" : "ORD_E2"
+        }
+      }
+    }
+  }
+}
