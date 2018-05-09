@@ -121,7 +121,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mRouteRef = FirebaseDatabase.getInstance().getReference().child("route");
         mRouteRef.keepSynced(true);
 
-        mUserRoutesRef = FirebaseDatabase.getInstance().getReference().child("user").child("routes");
+        mUserRoutesRef = FirebaseDatabase.getInstance().getReference().child("user").child(mUserId).child("routes");
         mUserRoutesRef.keepSynced(true);
 
         mRoutes = new ArrayList<Route>();
@@ -144,9 +144,14 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mMenuButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                showNearbyFragment();
+//                showNearbyFragment();
+                logout();
             }
         });
+    }
+
+    private void logout() {
+        mAuth.signOut();
     }
 
     private void setupGoogleSignIn() {
@@ -294,9 +299,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 String enteredDate = dateTextView.getText().toString();
 
                 String routeID = "R_" + airportKey + "_" + startGateLabel + "_" + destGateLabel;
+                String startGateID = airportKey + "_" + startGateLabel;
+                String destGateID = airportKey + "_" + destGateLabel;
 
-                Query getRoute = mRouteRef.equalTo(routeID);
-                getRoute.addValueEventListener(new RouteValueEventListener());
+                Log.d("ROUTEID", routeID);
+//                Query getRoute = mRouteRef.equalTo(routeID);
+                mRouteRef.child(routeID).addValueEventListener(new RouteValueEventListener(routeID, enteredDate, startGateID, destGateID));
                 //TODO:  add route to firebase under userID
 
                 //TODO: REMOVE DUMMY VALUES
@@ -535,13 +543,40 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
     private class RouteValueEventListener implements ValueEventListener {
+
+        private String routeID;
+        private String enteredDate;
+        private String startGateID;
+        private String destGateID;
+
+
+        public RouteValueEventListener(String routeID, String enteredDate, String startGateID, String destGateID) {
+            this.routeID = routeID;
+            this.enteredDate = enteredDate;
+            this.startGateID = startGateID;
+            this.destGateID = destGateID;
+        }
+
         @Override
         public void onDataChange(DataSnapshot dataSnapshot) {
             //TODO: we're going to want to get a route from "route" and then create a route object.
             //TODO: then push to userRoutesRef
+            Log.d("LOOK AT THIS", dataSnapshot.toString());
             if (dataSnapshot != null) {
-
+                Route route = dataSnapshot.getValue(Route.class);
+                route.setRouteID(dataSnapshot.getKey());
+                route.setDate(enteredDate);
+                mRoutes.add(0, route);
+                String userRouteID = mUserRoutesRef.push().getKey();
+                mUserRoutesRef.child(userRouteID).setValue(route);
             }
+            else {
+                Route route = new Route(routeID, enteredDate, startGateID, destGateID, new ArrayList<Double>(), new ArrayList<Double>());
+                mRoutes.add(0, route);
+                String userRouteID = mUserRoutesRef.push().getKey();
+                mUserRoutesRef.child(userRouteID).setValue(route);
+            }
+
         }
 
         @Override

@@ -1,7 +1,5 @@
 package edu.rosehulman.ciepieab.gatego;
 
-import com.google.android.gms.maps.model.LatLng;
-
 import java.util.List;
 
 /**
@@ -14,15 +12,20 @@ public class Route {
     private String date;
     private String startGateID;
     private String destGateID;
-    private List<Double> latPolyPoints;
-    private List<Double> longPolyPoints;
+    private List<Double> latPolyPoint;
+    private List<Double> longPolyPoint;
 
-    public Route(String date, String startGateID, String destGateID, List<Double> latPolyPoints, List<Double> longPolyPoint) {
-        //this.date = date;
+    public Route(String routeID, String date, String startGateID, String destGateID, List<Double> latPolyPoint, List<Double> longPolyPoint) {
+        this.routeID = routeID;
+        this.date = date;
         this.startGateID = startGateID;
         this.destGateID = destGateID;
-        this.latPolyPoints = latPolyPoints;
-        this.longPolyPoints = longPolyPoint;
+        this.latPolyPoint = latPolyPoint;
+        this.longPolyPoint = longPolyPoint;
+    }
+
+    public Route() {
+
     }
 
     public String getRouteID() {
@@ -57,19 +60,19 @@ public class Route {
         this.destGateID = destGateID;
     }
 
-    public List<Double> getLatPolyPoints() {
-        return latPolyPoints;
+    public List<Double> getLatPolyPoint() {
+        return latPolyPoint;
     }
 
-    public void setLatPolyPoints(List<Double> latPolyPoints) {
-        this.latPolyPoints = latPolyPoints;
+    public void setLatPolyPoint(List<Double> latPolyPoint) {
+        this.latPolyPoint = latPolyPoint;
     }
 
-    public List<Double> getLongPolyPoints() {
-        return longPolyPoints;
+    public List<Double> getLongPolyPoint() {
+        return longPolyPoint;
     }
 
-    public void setLongPolyPoints(List<Double> longPolyPoints) {
-        this.longPolyPoints = longPolyPoints;
+    public void setLongPolyPoint(List<Double> longPolyPoint) {
+        this.longPolyPoint = longPolyPoint;
     }
 }
