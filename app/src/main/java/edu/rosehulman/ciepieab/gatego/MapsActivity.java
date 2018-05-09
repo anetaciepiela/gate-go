@@ -14,6 +14,7 @@ import android.os.Bundle;
 import android.text.InputType;
 import android.util.Log;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.CalendarView;
@@ -59,11 +60,9 @@ import com.google.maps.errors.ApiException;
 import com.google.maps.model.DirectionsResult;
 import com.google.maps.model.TravelMode;
 
-import org.joda.time.DateTime;
 
 import java.io.IOException;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
+
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
@@ -73,13 +72,11 @@ import java.util.concurrent.TimeUnit;
 import static java.lang.Math.abs;
 import static java.lang.Math.log1p;
 
-public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, NearbyFragment.OnSwipeListener, GoogleApiClient.OnConnectionFailedListener, LoginFragment.OnLoginListener {
+public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, NearbyFragment.OnSwipeListener, GoogleApiClient.OnConnectionFailedListener, LoginFragment.OnLoginListener, AdapterView.OnItemSelectedListener {
 
     private GoogleMap mMap;
     private EditText addAirportEditText;
     private Calendar mCalendar;
-    private DateFormat mTodayTomorrowFormatter;
-    private DateFormat mOtherDayFormatter;
     private ImageView mMenuButton;
     private List<Route> mRoutes;
     private String mUserId;
@@ -179,12 +176,15 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mUserRoutesRef.keepSynced(true);
 
         mRoutes = new ArrayList<Route>();
+        mRoutes.add(new Route("as;gi", "da;li", "divnei", new ArrayList<Double>(), new ArrayList<Double>()));
         mCalendar = Calendar.getInstance();
-        mTodayTomorrowFormatter = new SimpleDateFormat("MM/dd/yy");
-        mOtherDayFormatter = new SimpleDateFormat("E-MM/dd/yy");
 
         mRouteSpinner = findViewById(R.id.route_spinner);
+        mRouteSpinner.setOnItemSelectedListener(this);
+        SpinnerAdapter spinnerAdapter = new SpinnerAdapter(this, android.R.layout.simple_list_item_2, android.R.id.text1, mRoutes);
 //        ArrayAdapter<String> spinnerAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_2, mRoutes);
+        spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        mRouteSpinner.setAdapter(spinnerAdapter);
 
 
         addAirportEditText = findViewById(R.id.add_airport_editText);
@@ -275,7 +275,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private void showAddRouteDialog(final String airportKey) {
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         View view = getLayoutInflater().inflate(R.layout.dialog_add_route, null, false);
-        //TODO DATE TYPE
         //Capture widgets
         final AutoCompleteTextView startGateEditText = view.findViewById(R.id.start_gate_editText);
         startGateEditText.setInputType(InputType.TYPE_TEXT_FLAG_CAP_SENTENCES);
@@ -284,20 +283,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         Query gatesByAirport = mGateRef.orderByChild("airportKey").equalTo(airportKey);
         gatesByAirport.addValueEventListener(new GateValueEventListener(startGateEditText, destGateNameEditText));
 
-        final LinearLayout dateLayout = view.findViewById(R.id.date_layout);
-        final TextView dateTextView = view.findViewById(R.id.date_text_view);
-        final String todaysDate = mTodayTomorrowFormatter.format(mCalendar.getTime());
-        final String defaultDate = getResources().getQuantityString(R.plurals.date_format, 1, todaysDate);
-        dateTextView.setText(defaultDate);
-        dateLayout.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                showCalendarDialog(todaysDate, dateTextView);
-                //dateTextView.setText(showCalendarDialog(todaysDate));
-                //String selectedFormattedDate = showCalendarDialog(todaysDate);
-                //dateTextView.setText(selectedFormattedDate);
-            }
-        });
         builder.setTitle("Enter Your Gate Information");
         builder.setPositiveButton(R.string.save, new DialogInterface.OnClickListener() {
             @Override
@@ -305,7 +290,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 //TODO: get all input data, add route (model object) to mAirports
                 String startGateLabel = startGateEditText.getText().toString();
                 String destGateLabel = destGateNameEditText.getText().toString();
-                String enteredDate = dateTextView.getText().toString();
 
                 String routeID = "R_" + airportKey + "_" + startGateLabel + "_" + destGateLabel;
                 String startGateID = airportKey + "_" + startGateLabel;
@@ -313,13 +297,13 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
                 Log.d("ROUTEID", routeID);
 //                Query getRoute = mRouteRef.equalTo(routeID);
-                mRouteRef.child(routeID).addValueEventListener(new RouteValueEventListener(routeID, enteredDate, startGateID, destGateID));
+                mRouteRef.child(routeID).addValueEventListener(new RouteValueEventListener(routeID, startGateID, destGateID));
                 //TODO:  add route to firebase under userID
 
                 //TODO: REMOVE DUMMY VALUES
                 //LatLng startCoord = new LatLng(39.7171641, -86.2974331);
                 //LatLng destCoord = new LatLng(39.7150811, -86.2948602);
-
+                updateView();
 //                Route newRoute = new Route(enteredDate, startCoord, destCoord, airportKey);
 //                mRoutes.add(newRoute);
 
@@ -341,6 +325,26 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         builder.create().show();
     }
 
+    private void updateView() {
+        final LatLng startGateCoord;
+        LatLng endGateCoord;
+
+        Route currentRoute = mRoutes.get(mRoutes.size() - 1);
+        Query gateByRoute = mGateRef.child("gateID").equalTo(currentRoute.getStartGateID());
+        gateByRoute.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                Gate startGate = dataSnapshot.getValue(Gate.class);
+                //TODO:  make LatLng for startGate
+                //startGateCoord = new LatLng(startGate.getLatitude(), startGate.getLongitude());
+            }
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+            }
+        });
+        //if ()
+    }
+
     private void zoomToRouteView(Route route) {
         LatLngBounds.Builder builder = new LatLngBounds.Builder();
         //builder.include(route.getStartGate());
@@ -349,47 +353,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         CameraUpdate cu = CameraUpdateFactory.newLatLngBounds(bounds, 10);
         mMap.animateCamera(cu);
     }
-
-    @NonNull
-    private String getFormattedDate(String selectedDate, String todaysDate) {
-        Log.d("Day", String.valueOf(Integer.parseInt(selectedDate.substring(3, 4))));
-        int dateDifference = abs(Integer.parseInt(todaysDate.substring(3, 5)) - Integer.parseInt(selectedDate.substring(3, 5)));
-        String selectedDateFormatted = "";
-        if (dateDifference == 0) {
-            selectedDateFormatted = getResources().getQuantityString(R.plurals.date_format, 1, selectedDate);
-        } else if (dateDifference == 1) {
-            //TODO: FORMAT
-            selectedDateFormatted = getResources().getQuantityString(R.plurals.date_format, 2, selectedDate);
-        } else {
-            //TODO FORMAT
-            selectedDateFormatted = getResources().getQuantityString(R.plurals.date_format, 3, selectedDate);
-        }
-        return selectedDateFormatted;
-    }
-
-    private void showCalendarDialog(final String todaysDate, final TextView dateTextView) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        View view = getLayoutInflater().inflate(R.layout.dialog_calendar, null, false);
-        final CalendarView calendarView = view.findViewById(R.id.calendar_view);
-        final GregorianCalendar calendar = new GregorianCalendar();
-        calendarView.setOnDateChangeListener(new CalendarView.OnDateChangeListener() {
-            @Override
-            public void onSelectedDayChange(@NonNull CalendarView view, int year, int month, int dayOfMonth) {
-                calendar.set(year, month, dayOfMonth);
-            }
-        });
-        builder.setView(view);
-        builder.setPositiveButton(android.R.string.ok, new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                Log.d("Correct DATE", getFormattedDate(mTodayTomorrowFormatter.format(calendar.getTime()), todaysDate));
-                dateTextView.setText(getFormattedDate(mTodayTomorrowFormatter.format(calendar.getTime()), todaysDate));
-            }
-        });
-
-        builder.create().show();
-    }
-
 
     /**
      * Manipulates the map once available.
@@ -492,6 +455,16 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         startActivityForResult(intent, RC_GOOGLE_LOGIN);
     }
 
+    @Override
+    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+        Log.d("TAG", "This is the item being selected: " + mRoutes.get(position));
+    }
+
+    @Override
+    public void onNothingSelected(AdapterView<?> parent) {
+
+    }
+
 
     private class AirportValueEventListener implements ValueEventListener {
 
@@ -554,14 +527,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private class RouteValueEventListener implements ValueEventListener {
 
         private String routeID;
-        private String enteredDate;
         private String startGateID;
         private String destGateID;
 
 
-        public RouteValueEventListener(String routeID, String enteredDate, String startGateID, String destGateID) {
+        public RouteValueEventListener(String routeID, String startGateID, String destGateID) {
             this.routeID = routeID;
-            this.enteredDate = enteredDate;
             this.startGateID = startGateID;
             this.destGateID = destGateID;
         }
@@ -571,16 +542,15 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             //TODO: we're going to want to get a route from "route" and then create a route object.
             //TODO: then push to userRoutesRef
             Log.d("LOOK AT THIS", dataSnapshot.toString());
-            if (dataSnapshot != null) {
+            if (dataSnapshot.getValue() != null) {
                 Route route = dataSnapshot.getValue(Route.class);
                 route.setRouteID(dataSnapshot.getKey());
-                route.setDate(enteredDate);
-                mRoutes.add(0, route);
+                mRoutes.add(route);
                 String userRouteID = mUserRoutesRef.push().getKey();
                 mUserRoutesRef.child(userRouteID).setValue(route);
             }
             else {
-                Route route = new Route(routeID, enteredDate, startGateID, destGateID, new ArrayList<Double>(), new ArrayList<Double>());
+                Route route = new Route(routeID, startGateID, destGateID, new ArrayList<Double>(), new ArrayList<Double>());
                 mRoutes.add(0, route);
                 String userRouteID = mUserRoutesRef.push().getKey();
                 mUserRoutesRef.child(userRouteID).setValue(route);
