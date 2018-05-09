@@ -20,6 +20,7 @@ import android.widget.CalendarView;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.Spinner;
 import android.widget.TextView;
 import android.support.design.widget.Snackbar;
 
@@ -94,6 +95,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private GoogleApiClient mGoogleApiClient;
     private OnCompleteListener mOnCompleteListener;
     private static final int RC_GOOGLE_LOGIN = 1;
+    private Spinner mRouteSpinner;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -111,43 +113,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         if (savedInstanceState == null) {
             switchToLoginFragment();
         }
-
-        mAirportRef = FirebaseDatabase.getInstance().getReference().child("airport");
-        mAirportRef.keepSynced(true);
-
-        mGateRef = FirebaseDatabase.getInstance().getReference().child("gate");
-        mGateRef.keepSynced(true);
-
-        mRouteRef = FirebaseDatabase.getInstance().getReference().child("route");
-        mRouteRef.keepSynced(true);
-
-        mUserRoutesRef = FirebaseDatabase.getInstance().getReference().child("user").child(mUserId).child("routes");
-        mUserRoutesRef.keepSynced(true);
-
-        mRoutes = new ArrayList<Route>();
-        mCalendar = Calendar.getInstance();
-        mTodayTomorrowFormatter = new SimpleDateFormat("MM/dd/yy");
-        mOtherDayFormatter = new SimpleDateFormat("E-MM/dd/yy");
-
-        addAirportEditText = findViewById(R.id.add_airport_editText);
-        mMenuButton = findViewById(R.id.nearby_frag_butt);
-
-        addAirportEditText.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                //if (mAirports.size() == 0) {
-                showAddAirportDialog();
-                //}
-            }
-        });
-
-        mMenuButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-//                showNearbyFragment();
-                logout();
-            }
-        });
     }
 
     private void logout() {
@@ -191,12 +156,56 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                     mUserId = user.getUid();
                     isLoggedIn = true;
                     switchToMapsFragment();
+                    initializeAppInfo();
                 }
                 else {
                     switchToLoginFragment();
                 }
             }
         };
+    }
+
+    private void initializeAppInfo() {
+        mAirportRef = FirebaseDatabase.getInstance().getReference().child("airport");
+        mAirportRef.keepSynced(true);
+
+        mGateRef = FirebaseDatabase.getInstance().getReference().child("gate");
+        mGateRef.keepSynced(true);
+
+        mRouteRef = FirebaseDatabase.getInstance().getReference().child("route");
+        mRouteRef.keepSynced(true);
+
+        mUserRoutesRef = FirebaseDatabase.getInstance().getReference().child("user").child(mUserId).child("routes");
+        mUserRoutesRef.keepSynced(true);
+
+        mRoutes = new ArrayList<Route>();
+        mCalendar = Calendar.getInstance();
+        mTodayTomorrowFormatter = new SimpleDateFormat("MM/dd/yy");
+        mOtherDayFormatter = new SimpleDateFormat("E-MM/dd/yy");
+
+        mRouteSpinner = findViewById(R.id.route_spinner);
+//        ArrayAdapter<String> spinnerAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_2, mRoutes);
+
+
+        addAirportEditText = findViewById(R.id.add_airport_editText);
+        mMenuButton = findViewById(R.id.nearby_frag_butt);
+
+        addAirportEditText.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //if (mAirports.size() == 0) {
+                showAddAirportDialog();
+                //}
+            }
+        });
+
+        mMenuButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+//                showNearbyFragment();
+                logout();
+            }
+        });
     }
 
     @Override
