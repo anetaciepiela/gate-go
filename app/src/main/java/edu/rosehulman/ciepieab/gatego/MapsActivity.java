@@ -82,6 +82,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private List<Route> mRoutes;
     private String mUserId;
     private boolean isLoggedIn;
+    private LatLng currStartGateCoord;
+    private LatLng currDestGateCoord;
 
     private FirebaseAuth mAuth;
     private FirebaseAuth.AuthStateListener mAuthListener;
@@ -327,23 +329,49 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
     private void updateView() {
-        final LatLng startGateCoord;
-        LatLng endGateCoord;
 
         Route currentRoute = mRoutes.get(mRoutes.size() - 1);
-        Query gateByRoute = mGateRef.child("gateID").equalTo(currentRoute.getStartGateID());
-        gateByRoute.addValueEventListener(new ValueEventListener() {
+        Log.d("START GATE ID", "startGateID  " + currentRoute.getStartGateID());
+        Query startGateByRoute = mGateRef.orderByChild("gateID").equalTo(currentRoute.getStartGateID());
+        //Query startGateByRoute = mGateRef.child(currentRoute.getStartGateID());
+        //TODO:  not going into methods inside ValueEventListener()...
+        //TODO: but we're pretty sure our query is correct
+        startGateByRoute.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
+                Log.d("TAG", "startGate stuff  " + dataSnapshot.toString());
                 Gate startGate = dataSnapshot.getValue(Gate.class);
                 //TODO:  make LatLng for startGate
-                //startGateCoord = new LatLng(startGate.getLatitude(), startGate.getLongitude());
+                currStartGateCoord = new LatLng(startGate.getLatitude(), startGate.getLongitude());
             }
             @Override
             public void onCancelled(DatabaseError databaseError) {
             }
         });
-        //if ()
+        Query destGateByRoute = mGateRef.orderByChild("gateID").equalTo(currentRoute.getDestGateID());
+        //Query destGateByRoute = mGateRef.child(currentRoute.getDestGateID());
+        destGateByRoute.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                Gate destGate = dataSnapshot.getValue(Gate.class);
+                currDestGateCoord = new LatLng(destGate.getLatitude(), destGate.getLongitude());
+            }
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+            }
+        });
+        mMap.addMarker(new MarkerOptions().position(currStartGateCoord).title("Start"));
+        mMap.addMarker(new MarkerOptions().position(currDestGateCoord).title("Destination"));
+
+        if (currentRoute.getLatPolyPoint().size() != 0 && currentRoute.getLatPolyPoint().size() != 0) {
+            PolylineOptions polylineOptions = new PolylineOptions();
+            for (int i = 0; i < currentRoute.getLatPolyPoint().size(); i++) {
+                LatLng currCoord = new LatLng(currentRoute.getLatPolyPoint().get(i), currentRoute.getLongPolyPoint().get(i));
+                polylineOptions.add(currCoord);
+            }
+            mMap.addPolyline(polylineOptions);
+        }
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currStartGateCoord, 10));
     }
 
     private void zoomToRouteView(Route route) {
@@ -379,13 +407,13 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         //mMap.moveCamera(CameraUpdateFactory.newLatLng(indyairport));
         //mMap.moveCamera(CameraUpdateFactory.zoomTo((float) indyairport.latitude));
-        LatLng gateF9 = new LatLng(41.9736345, -87.9058268);
-        LatLng gateF6 = new LatLng(41.9743681, -87.9062536);
-        mMap.addMarker(new MarkerOptions().position(gateF9).title("Marker at Gate"));
-        mMap.addMarker(new MarkerOptions().position(gateF6).title("Gate F6"));
-        Polyline polyline = googleMap.addPolyline((new PolylineOptions())
-                .add(gateF6, gateF9));
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(gateF9));
+        //LatLng gateF9 = new LatLng(41.9736345, -87.9058268);
+        //LatLng gateF6 = new LatLng(41.9743681, -87.9062536);
+        //mMap.addMarker(new MarkerOptions().position(gateF9).title("Marker at Gate"));
+        //mMap.addMarker(new MarkerOptions().position(gateF6).title("Gate F6"));
+//        Polyline polyline = googleMap.addPolyline((new PolylineOptions())
+//                .add(gateF6, gateF9));
+//        mMap.moveCamera(CameraUpdateFactory.newLatLng(gateF9));
     }
 
 //    private void drawRoute(Route route) {
@@ -546,13 +574,11 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             if (dataSnapshot.getValue() != null) {
                 Route route = dataSnapshot.getValue(Route.class);
                 route.setRouteID(dataSnapshot.getKey());
-                mRoutes.add(route);
                 String userRouteID = mUserRoutesRef.push().getKey();
                 mUserRoutesRef.child(userRouteID).setValue(route);
             }
             else {
                 Route route = new Route(routeID, startGateID, destGateID, new ArrayList<Double>(), new ArrayList<Double>());
-                mRoutes.add(0, route);
                 String userRouteID = mUserRoutesRef.push().getKey();
                 mUserRoutesRef.child(userRouteID).setValue(route);
             }
