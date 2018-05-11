@@ -13,6 +13,7 @@ public class Route {
     private String destGateID;
     private List<Double> latPolyPoint;
     private List<Double> longPolyPoint;
+    private String key;
 
     public Route(String routeID, String startGateID, String destGateID, List<Double> latPolyPoint, List<Double> longPolyPoint) {
         this.routeID = routeID;
@@ -64,5 +65,18 @@ public class Route {
 
     public void setLongPolyPoint(List<Double> longPolyPoint) {
         this.longPolyPoint = longPolyPoint;
+    }
+
+    @Override
+    public String toString() {
+        return routeID;
+    }
+
+    public String getKey() {
+        return key;
+    }
+
+    public void setKey(String key) {
+        this.key = key;
     }
 }

@@ -46,6 +46,7 @@ import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
+import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -172,17 +173,17 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mRouteRef = FirebaseDatabase.getInstance().getReference().child("route");
         mRouteRef.keepSynced(true);
 
+        mRoutes = new ArrayList<Route>();
+
         mUserRoutesRef = FirebaseDatabase.getInstance().getReference().child("user").child(mUserId).child("routes");
+        mUserRoutesRef.addChildEventListener(new UserRouteChildEventListener());
         mUserRoutesRef.keepSynced(true);
 
-        mRoutes = new ArrayList<Route>();
-        mRoutes.add(new Route("as;gi", "da;li", "divnei", new ArrayList<Double>(), new ArrayList<Double>()));
-        mCalendar = Calendar.getInstance();
 
         mRouteSpinner = findViewById(R.id.route_spinner);
         mRouteSpinner.setOnItemSelectedListener(this);
-        SpinnerAdapter spinnerAdapter = new SpinnerAdapter(this, android.R.layout.simple_list_item_2, android.R.id.text1, mRoutes);
-//        ArrayAdapter<String> spinnerAdapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_2, mRoutes);
+//        SpinnerAdapter spinnerAdapter = new SpinnerAdapter(this, android.R.layout.simple_list_item_2, mRoutes);
+        ArrayAdapter<Route> spinnerAdapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, mRoutes);
         spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         mRouteSpinner.setAdapter(spinnerAdapter);
 
@@ -555,6 +556,42 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 String userRouteID = mUserRoutesRef.push().getKey();
                 mUserRoutesRef.child(userRouteID).setValue(route);
             }
+
+        }
+
+        @Override
+        public void onCancelled(DatabaseError databaseError) {
+
+        }
+    }
+
+    private class UserRouteChildEventListener implements ChildEventListener {
+
+        @Override
+        public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+            Route route = dataSnapshot.getValue(Route.class);
+            route.setKey(dataSnapshot.getKey());
+            mRoutes.add(route);
+        }
+
+        @Override
+        public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+
+        }
+
+        @Override
+        public void onChildRemoved(DataSnapshot dataSnapshot) {
+            String routeKeyToDelete = dataSnapshot.getKey();
+            for(Route r : mRoutes) {
+                if(routeKeyToDelete.equals(r.getKey())) {
+                    mRoutes.remove(r);
+                    return;
+                }
+            }
+        }
+
+        @Override
+        public void onChildMoved(DataSnapshot dataSnapshot, String s) {
 
         }
 

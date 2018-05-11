@@ -13,10 +13,10 @@ import java.util.List;
  * Created by ciepieab on 5/9/2018.
  */
 
-public class SpinnerAdapter extends ArrayAdapter{
+public class SpinnerAdapter extends ArrayAdapter<Route>{
 
-    public SpinnerAdapter(@NonNull Context context, int resource, int textViewResourceId, @NonNull List objects) {
-        super(context, resource, textViewResourceId, objects);
+    public SpinnerAdapter(@NonNull Context context, int resource, @NonNull List objects) {
+        super(context, resource, objects);
     }
 
     @Override
