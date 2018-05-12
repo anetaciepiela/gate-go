@@ -330,48 +330,52 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
     private void updateView() {
 
-        Route currentRoute = mRoutes.get(mRoutes.size() - 1);
+        final Route currentRoute = mRoutes.get(mRoutes.size() - 1);
         Log.d("START GATE ID", "startGateID  " + currentRoute.getStartGateID());
-        Query startGateByRoute = mGateRef.orderByChild("gateID").equalTo(currentRoute.getStartGateID());
-        //Query startGateByRoute = mGateRef.child(currentRoute.getStartGateID());
+        DatabaseReference startGateByRoute = mGateRef.child(currentRoute.getStartGateID());
+        startGateByRoute.keepSynced(true);
         //TODO:  not going into methods inside ValueEventListener()...
-        //TODO: but we're pretty sure our query is correct
-        startGateByRoute.addValueEventListener(new ValueEventListener() {
+        startGateByRoute.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 Log.d("TAG", "startGate stuff  " + dataSnapshot.toString());
                 Gate startGate = dataSnapshot.getValue(Gate.class);
-                //TODO:  make LatLng for startGate
+                //double longitude = dataSnapshot.child("longitude").getValue(Double.class);
+                Log.d("gate", startGate.getLatitude() + " " + startGate.getLongitude() + " " + startGate.getAirportKey() + " " + startGate.getLabel() + " " + startGate.getGateID());
+
                 currStartGateCoord = new LatLng(startGate.getLatitude(), startGate.getLongitude());
+                Log.d("START GATE COORD", "this is my startGate latLng: " + currStartGateCoord.toString());
+                mMap.addMarker(new MarkerOptions().position(currStartGateCoord).title("Start"));
+                mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currStartGateCoord, 10));
             }
             @Override
             public void onCancelled(DatabaseError databaseError) {
             }
         });
-        Query destGateByRoute = mGateRef.orderByChild("gateID").equalTo(currentRoute.getDestGateID());
-        //Query destGateByRoute = mGateRef.child(currentRoute.getDestGateID());
-        destGateByRoute.addValueEventListener(new ValueEventListener() {
+        DatabaseReference destGateByRoute = mGateRef.child(currentRoute.getDestGateID());
+        destGateByRoute.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 Gate destGate = dataSnapshot.getValue(Gate.class);
+                Log.d("gate", destGate.getLatitude() + " " + destGate.getLongitude() + " " + destGate.getAirportKey() + " " + destGate.getLabel() + " " + destGate.getGateID());
+
                 currDestGateCoord = new LatLng(destGate.getLatitude(), destGate.getLongitude());
+
+                mMap.addMarker(new MarkerOptions().position(currDestGateCoord).title("Destination"));
             }
             @Override
             public void onCancelled(DatabaseError databaseError) {
             }
         });
-        mMap.addMarker(new MarkerOptions().position(currStartGateCoord).title("Start"));
-        mMap.addMarker(new MarkerOptions().position(currDestGateCoord).title("Destination"));
 
-        if (currentRoute.getLatPolyPoint().size() != 0 && currentRoute.getLatPolyPoint().size() != 0) {
-            PolylineOptions polylineOptions = new PolylineOptions();
-            for (int i = 0; i < currentRoute.getLatPolyPoint().size(); i++) {
-                LatLng currCoord = new LatLng(currentRoute.getLatPolyPoint().get(i), currentRoute.getLongPolyPoint().get(i));
-                polylineOptions.add(currCoord);
-            }
-            mMap.addPolyline(polylineOptions);
-        }
-        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currStartGateCoord, 10));
+//        if (currentRoute.getLatPolyPoint().size() != 0 && currentRoute.getLatPolyPoint().size() != 0) {
+//            PolylineOptions polylineOptions = new PolylineOptions();
+//            for (int i = 0; i < currentRoute.getLatPolyPoint().size(); i++) {
+//                LatLng currCoord = new LatLng(currentRoute.getLatPolyPoint().get(i), currentRoute.getLongPolyPoint().get(i));
+//                polylineOptions.add(currCoord);
+//            }
+//            mMap.addPolyline(polylineOptions);
+//        }
     }
 
     private void zoomToRouteView(Route route) {
