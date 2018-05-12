@@ -11,8 +11,12 @@ import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.text.InputType;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -73,7 +77,7 @@ import java.util.concurrent.TimeUnit;
 import static java.lang.Math.abs;
 import static java.lang.Math.log1p;
 
-public class MapsActivity extends FragmentActivity implements OnMapReadyCallback, NearbyFragment.OnSwipeListener, GoogleApiClient.OnConnectionFailedListener, LoginFragment.OnLoginListener, AdapterView.OnItemSelectedListener {
+public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback, NearbyFragment.OnSwipeListener, GoogleApiClient.OnConnectionFailedListener, LoginFragment.OnLoginListener, AdapterView.OnItemSelectedListener {
 
     private GoogleMap mMap;
     private EditText addAirportEditText;
@@ -183,12 +187,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
 
         mRouteSpinner = findViewById(R.id.route_spinner);
-        mRouteSpinner.setOnItemSelectedListener(this);
-//        SpinnerAdapter spinnerAdapter = new SpinnerAdapter(this, android.R.layout.simple_list_item_2, mRoutes);
         ArrayAdapter<Route> spinnerAdapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, mRoutes);
         spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         mRouteSpinner.setAdapter(spinnerAdapter);
-
+        mRouteSpinner.setOnItemSelectedListener(this);
 
         addAirportEditText = findViewById(R.id.add_airport_editText);
         mMenuButton = findViewById(R.id.nearby_frag_butt);
@@ -196,17 +198,14 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         addAirportEditText.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //if (mAirports.size() == 0) {
                 showAddAirportDialog();
-                //}
             }
         });
 
         mMenuButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-//                showNearbyFragment();
-                logout();
+                showNearbyFragment();
             }
         });
     }
@@ -226,6 +225,29 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 }
             }
         }
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.menu_main, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+        int id = item.getItemId();
+
+        //noinspection SimplifiableIfStatement
+        if (id == R.id.action_logout) {
+            logout();
+            return true;
+        }
+
+        return super.onOptionsItemSelected(item);
     }
 
     private void switchToMapsFragment() {
@@ -284,7 +306,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         final AutoCompleteTextView destGateNameEditText = view.findViewById(R.id.dest_gate_editText);
         destGateNameEditText.setInputType(InputType.TYPE_TEXT_FLAG_CAP_SENTENCES);
         Query gatesByAirport = mGateRef.orderByChild("airportKey").equalTo(airportKey);
-        gatesByAirport.addValueEventListener(new GateValueEventListener(startGateEditText, destGateNameEditText));
+        gatesByAirport.addListenerForSingleValueEvent(new GateValueEventListener(startGateEditText, destGateNameEditText));
 
         builder.setTitle("Enter Your Gate Information");
         builder.setPositiveButton(R.string.save, new DialogInterface.OnClickListener() {
@@ -299,25 +321,13 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 String destGateID = airportKey + "_" + destGateLabel;
 
                 Log.d("ROUTEID", routeID);
-//                Query getRoute = mRouteRef.equalTo(routeID);
                 mRouteRef.child(routeID).addValueEventListener(new RouteValueEventListener(routeID, startGateID, destGateID));
-                //TODO:  add route to firebase under userID
-
-                //TODO: REMOVE DUMMY VALUES
-                //LatLng startCoord = new LatLng(39.7171641, -86.2974331);
-                //LatLng destCoord = new LatLng(39.7150811, -86.2948602);
-                updateView();
-//                Route newRoute = new Route(enteredDate, startCoord, destCoord, airportKey);
-//                mRoutes.add(newRoute);
-
-//                drawRoute(newRoute);
-//                zoomToRouteView(newRoute);
 
                 Snackbar snackbar = Snackbar.make(findViewById(R.id.map_view), getResources().getString(R.string.route_time), Snackbar.LENGTH_INDEFINITE);
-                snackbar.setAction("Start Navigation", new View.OnClickListener() {
+                snackbar.setAction("Start Navigation of Route Added", new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        //TODO: start navigation!
+                        updateView(mRoutes.size() - 1);
                     }
                 });
                 snackbar.show();
@@ -328,25 +338,18 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         builder.create().show();
     }
 
-    private void updateView() {
-
-        final Route currentRoute = mRoutes.get(mRoutes.size() - 1);
-        Log.d("START GATE ID", "startGateID  " + currentRoute.getStartGateID());
+    private void updateView(int pos) {
+        mMap.clear();
+        final Route currentRoute = mRoutes.get(pos);
         DatabaseReference startGateByRoute = mGateRef.child(currentRoute.getStartGateID());
         startGateByRoute.keepSynced(true);
-        //TODO:  not going into methods inside ValueEventListener()...
         startGateByRoute.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                Log.d("TAG", "startGate stuff  " + dataSnapshot.toString());
                 Gate startGate = dataSnapshot.getValue(Gate.class);
-                //double longitude = dataSnapshot.child("longitude").getValue(Double.class);
-                Log.d("gate", startGate.getLatitude() + " " + startGate.getLongitude() + " " + startGate.getAirportKey() + " " + startGate.getLabel() + " " + startGate.getGateID());
-
                 currStartGateCoord = new LatLng(startGate.getLatitude(), startGate.getLongitude());
-                Log.d("START GATE COORD", "this is my startGate latLng: " + currStartGateCoord.toString());
                 mMap.addMarker(new MarkerOptions().position(currStartGateCoord).title("Start"));
-                mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currStartGateCoord, 10));
+                mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(currStartGateCoord, 20));
             }
             @Override
             public void onCancelled(DatabaseError databaseError) {
@@ -357,10 +360,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 Gate destGate = dataSnapshot.getValue(Gate.class);
-                Log.d("gate", destGate.getLatitude() + " " + destGate.getLongitude() + " " + destGate.getAirportKey() + " " + destGate.getLabel() + " " + destGate.getGateID());
-
                 currDestGateCoord = new LatLng(destGate.getLatitude(), destGate.getLongitude());
-
                 mMap.addMarker(new MarkerOptions().position(currDestGateCoord).title("Destination"));
             }
             @Override
@@ -368,14 +368,14 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             }
         });
 
-//        if (currentRoute.getLatPolyPoint().size() != 0 && currentRoute.getLatPolyPoint().size() != 0) {
-//            PolylineOptions polylineOptions = new PolylineOptions();
-//            for (int i = 0; i < currentRoute.getLatPolyPoint().size(); i++) {
-//                LatLng currCoord = new LatLng(currentRoute.getLatPolyPoint().get(i), currentRoute.getLongPolyPoint().get(i));
-//                polylineOptions.add(currCoord);
-//            }
-//            mMap.addPolyline(polylineOptions);
-//        }
+        if (currentRoute.getLatPolyPoint() != null && currentRoute.getLatPolyPoint() != null) {
+            PolylineOptions polylineOptions = new PolylineOptions();
+            for (int i = 0; i < currentRoute.getLatPolyPoint().size(); i++) {
+                LatLng currCoord = new LatLng(currentRoute.getLatPolyPoint().get(i), currentRoute.getLongPolyPoint().get(i));
+                polylineOptions.add(currCoord);
+            }
+            mMap.addPolyline(polylineOptions);
+        }
     }
 
     private void zoomToRouteView(Route route) {
@@ -400,46 +400,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
 
-        // Add a marker in Sydney and move the camera
-        LatLng indyairport = new LatLng(39.7168593, -86.29559519999998);
-        LatLng sydney = new LatLng(-34, 151);
-        //mMap.addMarker(new MarkerOptions().position(indyairport).title("Marker at airport"));
-        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(indyairport, 16));
-
-//        mMap.setIndoorEnabled(true);
-
-
-        //mMap.moveCamera(CameraUpdateFactory.newLatLng(indyairport));
-        //mMap.moveCamera(CameraUpdateFactory.zoomTo((float) indyairport.latitude));
-        //LatLng gateF9 = new LatLng(41.9736345, -87.9058268);
-        //LatLng gateF6 = new LatLng(41.9743681, -87.9062536);
-        //mMap.addMarker(new MarkerOptions().position(gateF9).title("Marker at Gate"));
-        //mMap.addMarker(new MarkerOptions().position(gateF6).title("Gate F6"));
-//        Polyline polyline = googleMap.addPolyline((new PolylineOptions())
-//                .add(gateF6, gateF9));
-//        mMap.moveCamera(CameraUpdateFactory.newLatLng(gateF9));
     }
-
-//    private void drawRoute(Route route) {
-//        DateTime now = new DateTime();
-//        try {
-//            DirectionsResult result = DirectionsApi.newRequest(getGeoContext())
-//                    .mode(TravelMode.WALKING)
-//                    .origin(Double.toString(route.getStartGate().latitude) + "," + Double.toString(route.getStartGate().longitude))
-//                    .destination(Double.toString(route.getDestGate().latitude) + "," + Double.toString(route.getDestGate().longitude))
-//                    .departureTime(now)
-//                    .await();
-//            Log.d("TAG", "DirectionsResult:  " + result);
-//            addMarkersToMap(result, mMap);
-//            addPolyline(result, mMap);
-//        } catch (ApiException e) {
-//            e.printStackTrace();
-//        } catch (InterruptedException e) {
-//            e.printStackTrace();
-//        } catch (IOException e) {
-//            e.printStackTrace();
-//        }
-//    }
 
     private void addMarkersToMap(DirectionsResult results, GoogleMap mMap) {
         mMap.addMarker(new MarkerOptions().position(new LatLng(results.routes[0].legs[0].startLocation.lat, results.routes[0].legs[0].startLocation.lng)).title(results.routes[0].legs[0].startAddress));
@@ -574,7 +535,6 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         public void onDataChange(DataSnapshot dataSnapshot) {
             //TODO: we're going to want to get a route from "route" and then create a route object.
             //TODO: then push to userRoutesRef
-            Log.d("LOOK AT THIS", dataSnapshot.toString());
             if (dataSnapshot.getValue() != null) {
                 Route route = dataSnapshot.getValue(Route.class);
                 route.setRouteID(dataSnapshot.getKey());

@@ -22,5 +22,7 @@
     <string name="invalid_password">Invalid password</string>
     <string name="field_required">Field required</string>
     <string name="invalid_email">Invalid email</string>
+    <string name="logout">Logout</string>
+    <string name="delete_routes">Delete Routes</string>
 
 </resources>
