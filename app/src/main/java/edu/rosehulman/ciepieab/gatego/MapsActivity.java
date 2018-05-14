@@ -79,6 +79,7 @@ import java.util.concurrent.TimeUnit;
 
 import static java.lang.Math.abs;
 import static java.lang.Math.log1p;
+import static java.lang.Math.toIntExact;
 
 public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback, NearbyFragment.OnSwipeListener, GoogleApiClient.OnConnectionFailedListener, LoginFragment.OnLoginListener, AdapterView.OnItemSelectedListener {
 
@@ -103,6 +104,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private OnCompleteListener mOnCompleteListener;
     private static final int RC_GOOGLE_LOGIN = 1;
     private Spinner mRouteSpinner;
+    private TextView mSpinnerTitleTextView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -190,11 +192,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
 
         mRouteSpinner = findViewById(R.id.route_spinner);
-        mRouteSpinner.setPrompt("My Routes");
-        ArrayAdapter<Route> spinnerAdapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, mRoutes);
-        spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        mRouteSpinner.setAdapter(spinnerAdapter);
-        mRouteSpinner.setOnItemSelectedListener(this);
+        mSpinnerTitleTextView = findViewById(R.id.spinner_title_textview);
+
 
         FloatingActionButton fab = findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -274,7 +273,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private String[] getRouteNames() {
         String[] routeNames = new String[mRoutes.size()];
         for (int i = 0; i < mRoutes.size(); i++) {
-            routeNames[i] = mRoutes.get(i).getRouteID();
+            routeNames[i] = mRoutes.get(i).toString();
         }
         return routeNames;
     }
@@ -372,6 +371,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private void updateView(int pos) {
         mMap.clear();
         final Route currentRoute = mRoutes.get(pos);
+        mSpinnerTitleTextView.setText(currentRoute.toString());
         DatabaseReference startGateByRoute = mGateRef.child(currentRoute.getStartGateID());
         startGateByRoute.keepSynced(true);
         startGateByRoute.addListenerForSingleValueEvent(new ValueEventListener() {
@@ -482,7 +482,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     @Override
     public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-        Log.d("TAG", "This is the item being selected: " + mRoutes.get(position));
+        updateView(position);
     }
 
     @Override
@@ -508,7 +508,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 mAirports.add(airportAbbr);
             }
             ArrayAdapter<String> autoAdapter = new ArrayAdapter<String>(MapsActivity.this, android.R.layout.simple_list_item_1, mAirports);
-            //AutoCompleteTextView airportAbbrText = findViewById(R.id.airport_name_editText);
             airportAutoComplete.setAdapter(autoAdapter);
         }
 
@@ -595,6 +594,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             Route route = dataSnapshot.getValue(Route.class);
             route.setKey(dataSnapshot.getKey());
             mRoutes.add(route);
+            setAdapter();
         }
 
         @Override
@@ -622,5 +622,12 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         public void onCancelled(DatabaseError databaseError) {
 
         }
+    }
+
+    private void setAdapter() {
+        ArrayAdapter<Route> spinnerAdapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, mRoutes);
+        spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        mRouteSpinner.setAdapter(spinnerAdapter);
+        mRouteSpinner.setOnItemSelectedListener(this);
     }
 }

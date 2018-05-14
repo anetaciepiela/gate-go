@@ -29,6 +29,7 @@
             </Spinner>
 
             <TextView
+                android:id="@+id/spinner_title_textview"
                 android:text="@string/my_routes"
                 android:gravity="center_vertical"
                 android:textSize="17sp"
@@ -47,7 +48,7 @@
         android:layout_gravity="bottom|end"
         android:layout_margin="@dimen/fab_margin"
         app:fabSize="normal"
-        app:srcCompat="@android:drawable/ic_input_add" />
+        app:srcCompat="@drawable/ic_action_add_route" />
 
 </fragment>
 
