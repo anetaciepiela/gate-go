@@ -6,6 +6,13 @@
     android:layout_height="match_parent"
     android:gravity="top">
 
+
+    <EditText
+        android:id="@+id/route_name_editText"
+        style="@style/TextBoxStyle"
+        android:inputType="textPersonName"
+        android:hint="Enter a route name" />
+
     <AutoCompleteTextView
         android:id="@+id/start_gate_editText"
         style="@style/TextBoxStyle"

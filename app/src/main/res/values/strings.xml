@@ -6,7 +6,7 @@
     <string name="start_gate">Start gate...</string>
     <string name="destination_gate">Destination gate...</string>
     <string name="route_time">6 min</string>
-
+    <string name="my_routes">My Routes</string>
 
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>

@@ -3,7 +3,9 @@ package edu.rosehulman.ciepieab.gatego;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.app.Dialog;
 import android.content.Intent;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.content.DialogInterface;
@@ -21,6 +23,7 @@ import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
+import android.widget.Button;
 import android.widget.CalendarView;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -80,7 +83,7 @@ import static java.lang.Math.log1p;
 public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback, NearbyFragment.OnSwipeListener, GoogleApiClient.OnConnectionFailedListener, LoginFragment.OnLoginListener, AdapterView.OnItemSelectedListener {
 
     private GoogleMap mMap;
-    private EditText addAirportEditText;
+    //private Button addAirportButton;
     private Calendar mCalendar;
     private ImageView mMenuButton;
     private List<Route> mRoutes;
@@ -187,29 +190,29 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
 
         mRouteSpinner = findViewById(R.id.route_spinner);
+        mRouteSpinner.setPrompt("My Routes");
         ArrayAdapter<Route> spinnerAdapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, mRoutes);
         spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         mRouteSpinner.setAdapter(spinnerAdapter);
         mRouteSpinner.setOnItemSelectedListener(this);
 
-        addAirportEditText = findViewById(R.id.add_airport_editText);
-        mMenuButton = findViewById(R.id.nearby_frag_butt);
-
-        addAirportEditText.setOnClickListener(new View.OnClickListener() {
+        FloatingActionButton fab = findViewById(R.id.fab);
+        fab.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View v) {
+            public void onClick(View view) {
                 showAddAirportDialog();
             }
         });
 
-        mMenuButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                showNearbyFragment();
-            }
-        });
+//        addAirportButton = findViewById(R.id.add_airport_editText);
+//
+//        addAirportButton.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                showAddAirportDialog();
+//            }
+//        });
     }
-
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if(resultCode == Activity.RESULT_OK) {
@@ -246,8 +249,34 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             logout();
             return true;
         }
+        if (id == R.id.action_delete_routes) {
+            showDeleteDialog();
+            return true;
+        }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    private void showDeleteDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("Select which route to delete");
+        builder.setItems(getRouteNames(), new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                Route route = mRoutes.get(which);
+                mUserRoutesRef.child(route.getKey()).removeValue();
+            }
+        });
+        builder.setNegativeButton(android.R.string.cancel, null);
+        builder.create().show();
+    }
+
+    private String[] getRouteNames() {
+        String[] routeNames = new String[mRoutes.size()];
+        for (int i = 0; i < mRoutes.size(); i++) {
+            routeNames[i] = mRoutes.get(i).getRouteID();
+        }
+        return routeNames;
     }
 
     private void switchToMapsFragment() {
@@ -301,6 +330,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         AlertDialog.Builder builder = new AlertDialog.Builder(this);
         View view = getLayoutInflater().inflate(R.layout.dialog_add_route, null, false);
         //Capture widgets
+        final EditText routeNameEditText = view.findViewById(R.id.route_name_editText);
         final AutoCompleteTextView startGateEditText = view.findViewById(R.id.start_gate_editText);
         startGateEditText.setInputType(InputType.TYPE_TEXT_FLAG_CAP_SENTENCES);
         final AutoCompleteTextView destGateNameEditText = view.findViewById(R.id.dest_gate_editText);
@@ -315,13 +345,14 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 //TODO: get all input data, add route (model object) to mAirports
                 String startGateLabel = startGateEditText.getText().toString();
                 String destGateLabel = destGateNameEditText.getText().toString();
+                String routeName = routeNameEditText.getText().toString();
 
                 String routeID = "R_" + airportKey + "_" + startGateLabel + "_" + destGateLabel;
                 String startGateID = airportKey + "_" + startGateLabel;
                 String destGateID = airportKey + "_" + destGateLabel;
 
                 Log.d("ROUTEID", routeID);
-                mRouteRef.child(routeID).addValueEventListener(new RouteValueEventListener(routeID, startGateID, destGateID));
+                mRouteRef.child(routeID).addValueEventListener(new RouteValueEventListener(routeName, routeID, startGateID, destGateID));
 
                 Snackbar snackbar = Snackbar.make(findViewById(R.id.map_view), getResources().getString(R.string.route_time), Snackbar.LENGTH_INDEFINITE);
                 snackbar.setAction("Start Navigation of Route Added", new View.OnClickListener() {
@@ -520,12 +551,14 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     private class RouteValueEventListener implements ValueEventListener {
 
+        private String routeName;
         private String routeID;
         private String startGateID;
         private String destGateID;
 
 
-        public RouteValueEventListener(String routeID, String startGateID, String destGateID) {
+        public RouteValueEventListener(String routeName, String routeID, String startGateID, String destGateID) {
+            this.routeName = routeName;
             this.routeID = routeID;
             this.startGateID = startGateID;
             this.destGateID = destGateID;
@@ -542,7 +575,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 mUserRoutesRef.child(userRouteID).setValue(route);
             }
             else {
-                Route route = new Route(routeID, startGateID, destGateID, new ArrayList<Double>(), new ArrayList<Double>());
+                Route route = new Route(routeName, routeID, startGateID, destGateID, new ArrayList<Double>(), new ArrayList<Double>());
                 String userRouteID = mUserRoutesRef.push().getKey();
                 mUserRoutesRef.child(userRouteID).setValue(route);
             }

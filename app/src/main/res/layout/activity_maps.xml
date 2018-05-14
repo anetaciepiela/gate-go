@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <fragment xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:map="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/map_view"
     android:name="com.google.android.gms.maps.SupportMapFragment"
     android:layout_width="match_parent"
@@ -14,37 +14,40 @@
         android:layout_height="match_parent"
         android:orientation="vertical">
 
-        <Spinner
-            android:layout_width="300dp"
-            android:layout_height="45dp"
-            android:id="@+id/route_spinner"
-            android:background="#FFF">
+        <RelativeLayout
+            android:layout_width="350dp"
+            android:layout_height="55dp"
+            android:layout_gravity="center_horizontal"
+            android:gravity="center_horizontal">
 
-        </Spinner>
-
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal">
-            <ImageView
-                android:layout_width="45dp"
-                android:layout_height="45dp"
-                android:id="@+id/nearby_frag_butt"
-                android:src="@drawable/ic_menu_black_24dp"
-                android:layout_marginTop="15dp"
-                android:layout_marginLeft="5dp"
-                android:background="@drawable/rounded_corners"
-                />
-
-            <EditText
-                android:id="@+id/add_airport_editText"
+            <Spinner
+                android:id="@+id/route_spinner"
                 style="@style/TextBoxStyle"
-                android:layout_margin="15dp"
-                android:hint="Add airport..."/>
-        </LinearLayout>
+                android:dropDownWidth="350dp"
+                android:spinnerMode="dropdown"
+                android:layout_marginTop="15dp">
+            </Spinner>
+
+            <TextView
+                android:text="@string/my_routes"
+                android:gravity="center_vertical"
+                android:textSize="17sp"
+                android:textColor="#000"
+                android:background="@drawable/dropdown_01"
+                style="@style/TextBoxStyle" />
+
+        </RelativeLayout>
 
     </LinearLayout>
 
+    <android.support.design.widget.FloatingActionButton
+        android:id="@+id/fab"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|end"
+        android:layout_margin="@dimen/fab_margin"
+        app:fabSize="normal"
+        app:srcCompat="@android:drawable/ic_input_add" />
 
 </fragment>
 

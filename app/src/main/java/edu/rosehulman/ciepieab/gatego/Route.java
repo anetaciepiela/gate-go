@@ -9,13 +9,15 @@ import java.util.List;
 public class Route {
 
     private String routeID;
+    private String routeName;
     private String startGateID;
     private String destGateID;
     private List<Double> latPolyPoint;
     private List<Double> longPolyPoint;
     private String key;
 
-    public Route(String routeID, String startGateID, String destGateID, List<Double> latPolyPoint, List<Double> longPolyPoint) {
+    public Route(String routeName, String routeID, String startGateID, String destGateID, List<Double> latPolyPoint, List<Double> longPolyPoint) {
+        this.routeName = routeName;
         this.routeID = routeID;
         this.startGateID = startGateID;
         this.destGateID = destGateID;
@@ -25,6 +27,14 @@ public class Route {
 
     public Route() {
 
+    }
+
+    public String getRouteName() {
+        return routeName;
+    }
+
+    public void setRouteName(String routeName) {
+        this.routeName = routeName;
     }
 
     public String getRouteID() {
@@ -69,7 +79,7 @@ public class Route {
 
     @Override
     public String toString() {
-        return routeID;
+        return routeName;
     }
 
     public String getKey() {
