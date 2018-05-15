@@ -3,7 +3,10 @@
     <color name="colorPrimary">#000</color>
     <color name="colorPrimaryDark">#444</color>
     <color name="colorAccent">#cd392d</color>
-    <color name="editTextBackground">#FFE</color>
+    <color name="gateGoGreen">#6BBF63</color>
+    <color name="gateGoGreenAccent">#5FAB59</color>
+    <color name="gateGoYellow">#F0E930</color>
+    <color name="gateGoYellowAccent">#D5D02D</color>
     <color name="borderColor">#aaa</color>
     <color name="white">#FFF</color>
 </resources>

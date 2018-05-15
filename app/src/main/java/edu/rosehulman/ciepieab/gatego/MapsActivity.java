@@ -24,7 +24,6 @@ import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.Button;
-import android.widget.CalendarView;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -81,18 +80,19 @@ import static java.lang.Math.abs;
 import static java.lang.Math.log1p;
 import static java.lang.Math.toIntExact;
 
-public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback, NearbyFragment.OnSwipeListener, GoogleApiClient.OnConnectionFailedListener, LoginFragment.OnLoginListener, AdapterView.OnItemSelectedListener {
+public class MapsActivity extends AppCompatActivity implements OnMapReadyCallback, GoogleApiClient.OnConnectionFailedListener, LoginFragment.OnLoginListener, AdapterView.OnItemSelectedListener {
 
     private GoogleMap mMap;
-    //private Button addAirportButton;
-    private Calendar mCalendar;
-    private ImageView mMenuButton;
     private List<Route> mRoutes;
     private String mUserId;
     private boolean isLoggedIn;
     private LatLng currStartGateCoord;
     private LatLng currDestGateCoord;
     private Route currentRoute;
+    private Spinner mRouteSpinner;
+    private TextView mSpinnerTitleTextView;
+    private FloatingActionButton mFab;
+    private Toolbar mToolbar;
 
     private FirebaseAuth mAuth;
     private FirebaseAuth.AuthStateListener mAuthListener;
@@ -104,17 +104,27 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private GoogleApiClient mGoogleApiClient;
     private OnCompleteListener mOnCompleteListener;
     private static final int RC_GOOGLE_LOGIN = 1;
-    private Spinner mRouteSpinner;
-    private TextView mSpinnerTitleTextView;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_maps);
+        setContentView(R.layout.activity_main);
+
+        mToolbar = (Toolbar) findViewById(R.id.toolbar);
+        setSupportActionBar(mToolbar);
         // Obtain the SupportMapFragment and get notified when the map is ready to be used.
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map_view);
         mapFragment.getMapAsync(this);
+
+        mFab = findViewById(R.id.fab);
+        mFab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                showAddAirportDialog();
+            }
+        });
 
         mAuth = FirebaseAuth.getInstance();
         initializeListeners();
@@ -125,10 +135,23 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
     }
 
-    private void logout() {
-        mAuth.signOut();
+    private void initializeListeners() {
+        mAuthListener = new FirebaseAuth.AuthStateListener() {
+            @Override
+            public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
+                FirebaseUser user = firebaseAuth.getCurrentUser();
+                if(user != null) {
+                    mUserId = user.getUid();
+                    isLoggedIn = true;
+                    switchToMapsFragment();
+                    initializeAppInfo();
+                }
+                else {
+                    switchToLoginFragment();
+                }
+            }
+        };
     }
-
     private void setupGoogleSignIn() {
         GoogleSignInOptions gso = new GoogleSignInOptions
                 .Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
@@ -156,23 +179,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
     }
 
-    private void initializeListeners() {
-        mAuthListener = new FirebaseAuth.AuthStateListener() {
-            @Override
-            public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
-                FirebaseUser user = firebaseAuth.getCurrentUser();
-                Log.d("TAG", "USER LOGIN");
-                if(user != null) {
-                    mUserId = user.getUid();
-                    isLoggedIn = true;
-                    switchToMapsFragment();
-                    initializeAppInfo();
-                }
-                else {
-                    switchToLoginFragment();
-                }
-            }
-        };
+    private void logout() {
+        mAuth.signOut();
     }
 
     private void initializeAppInfo() {
@@ -194,25 +202,68 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         mRouteSpinner = findViewById(R.id.route_spinner);
         mSpinnerTitleTextView = findViewById(R.id.spinner_title_textview);
+    }
 
-
-        FloatingActionButton fab = findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
+    public void showAddAirportDialog() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        View view = getLayoutInflater().inflate(R.layout.dialog_add_airport, null, false);
+        final AutoCompleteTextView airportNameEditText = view.findViewById(R.id.airport_name_editText);
+        airportNameEditText.setInputType(InputType.TYPE_TEXT_FLAG_CAP_SENTENCES);
+        mAirportRef.addValueEventListener(new AirportValueEventListener(airportNameEditText));
+        builder.setTitle("Add Airport");
+        builder.setPositiveButton(getResources().getString(R.string.next), new DialogInterface.OnClickListener() {
             @Override
-            public void onClick(View view) {
-                showAddAirportDialog();
+            public void onClick(DialogInterface dialog, int which) {
+                String airportKey = airportNameEditText.getText().toString();
+                showAddRouteDialog(airportKey);
             }
         });
-
-//        addAirportButton = findViewById(R.id.add_airport_editText);
-//
-//        addAirportButton.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                showAddAirportDialog();
-//            }
-//        });
+        builder.setNegativeButton(android.R.string.cancel, null);
+        builder.setView(view);
+        builder.create().show();
     }
+
+    private void showAddRouteDialog(final String airportKey) {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        View view = getLayoutInflater().inflate(R.layout.dialog_add_route, null, false);
+        //Capture widgets
+        final EditText routeNameEditText = view.findViewById(R.id.route_name_editText);
+        final AutoCompleteTextView startGateEditText = view.findViewById(R.id.start_gate_editText);
+        startGateEditText.setInputType(InputType.TYPE_TEXT_FLAG_CAP_SENTENCES);
+        final AutoCompleteTextView destGateNameEditText = view.findViewById(R.id.dest_gate_editText);
+        destGateNameEditText.setInputType(InputType.TYPE_TEXT_FLAG_CAP_SENTENCES);
+        Query gatesByAirport = mGateRef.orderByChild("airportKey").equalTo(airportKey);
+        gatesByAirport.addListenerForSingleValueEvent(new GateValueEventListener(startGateEditText, destGateNameEditText));
+
+        builder.setTitle("Enter Your Gate Information");
+        builder.setPositiveButton(R.string.save, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                String startGateLabel = startGateEditText.getText().toString();
+                String destGateLabel = destGateNameEditText.getText().toString();
+                String routeName = routeNameEditText.getText().toString();
+
+                String routeID = "R_" + airportKey + "_" + startGateLabel + "_" + destGateLabel;
+                String startGateID = airportKey + "_" + startGateLabel;
+                String destGateID = airportKey + "_" + destGateLabel;
+
+                mRouteRef.child(routeID).addValueEventListener(new RouteValueEventListener(routeName, routeID, startGateID, destGateID));
+
+                Snackbar snackbar = Snackbar.make(findViewById(R.id.map_view), getResources().getString(R.string.snackbar), Snackbar.LENGTH_INDEFINITE);
+                snackbar.setAction("Start Navigation", new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        updateView(mRoutes.size() - 1);
+                    }
+                });
+                snackbar.show();
+            }
+        });
+        builder.setNegativeButton(android.R.string.cancel, null);
+        builder.setView(view);
+        builder.create().show();
+    }
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if(resultCode == Activity.RESULT_OK) {
@@ -253,7 +304,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             showDeleteDialog();
             return true;
         }
-
         return super.onOptionsItemSelected(item);
     }
 
@@ -264,14 +314,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 Route route = mRoutes.get(which);
-                Log.d("GGO", "before deleted: " + mRoutes.toString());
                 mUserRoutesRef.child(route.getKey()).removeValue();
-                Log.d("GGO", "after deleted: " + mRoutes.toString());
-//                if (route.equals(currentRoute)) {
-//                    if (which == 0) {
-//                        updateView(which);
-//                    }
-//                }
             }
         });
 
@@ -289,92 +332,21 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     private void switchToMapsFragment() {
         if(isLoggedIn) {
+            mFab.setVisibility(View.VISIBLE);
+            mToolbar.setVisibility(View.VISIBLE);
             FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
             ft.detach(mLoginFragment);
             ft.commit();
         }
-//        else {
-//            FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-//            ft.commit();
-//        }
-        Log.d("TAG", "IN SWITCH TO MAPS FRAG");
     }
 
     private void switchToLoginFragment() {
         FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
         mLoginFragment = new LoginFragment();
         ft.replace(R.id.map_view, mLoginFragment, "Login");
+        mFab.setVisibility(View.GONE);
+        mToolbar.setVisibility(View.GONE);
         ft.commit();
-    }
-
-    private void showNearbyFragment() {
-        Fragment nearbyFrag = new NearbyFragment();
-        FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
-        ft.replace(R.id.map_view, nearbyFrag);
-        ft.commit();
-    }
-
-    public void showAddAirportDialog() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        View view = getLayoutInflater().inflate(R.layout.dialog_add_airport, null, false);
-        final AutoCompleteTextView airportNameEditText = view.findViewById(R.id.airport_name_editText);
-        airportNameEditText.setInputType(InputType.TYPE_TEXT_FLAG_CAP_SENTENCES);
-        mAirportRef.addValueEventListener(new AirportValueEventListener(airportNameEditText));
-        builder.setTitle("Add Airport");
-        builder.setPositiveButton(getResources().getString(R.string.next), new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                String airportKey = airportNameEditText.getText().toString();
-                showAddRouteDialog(airportKey);
-            }
-        });
-        builder.setNegativeButton(android.R.string.cancel, null);
-        builder.setView(view);
-        builder.create().show();
-    }
-
-    @SuppressLint("ResourceType")
-    private void showAddRouteDialog(final String airportKey) {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        View view = getLayoutInflater().inflate(R.layout.dialog_add_route, null, false);
-        //Capture widgets
-        final EditText routeNameEditText = view.findViewById(R.id.route_name_editText);
-        final AutoCompleteTextView startGateEditText = view.findViewById(R.id.start_gate_editText);
-        startGateEditText.setInputType(InputType.TYPE_TEXT_FLAG_CAP_SENTENCES);
-        final AutoCompleteTextView destGateNameEditText = view.findViewById(R.id.dest_gate_editText);
-        destGateNameEditText.setInputType(InputType.TYPE_TEXT_FLAG_CAP_SENTENCES);
-        Query gatesByAirport = mGateRef.orderByChild("airportKey").equalTo(airportKey);
-        gatesByAirport.addListenerForSingleValueEvent(new GateValueEventListener(startGateEditText, destGateNameEditText));
-
-        builder.setTitle("Enter Your Gate Information");
-        builder.setPositiveButton(R.string.save, new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                //TODO: get all input data, add route (model object) to mAirports
-                String startGateLabel = startGateEditText.getText().toString();
-                String destGateLabel = destGateNameEditText.getText().toString();
-                String routeName = routeNameEditText.getText().toString();
-
-                String routeID = "R_" + airportKey + "_" + startGateLabel + "_" + destGateLabel;
-                String startGateID = airportKey + "_" + startGateLabel;
-                String destGateID = airportKey + "_" + destGateLabel;
-
-                Log.d("ROUTEID", routeID);
-                mRouteRef.child(routeID).addValueEventListener(new RouteValueEventListener(routeName, routeID, startGateID, destGateID));
-
-                Snackbar snackbar = Snackbar.make(findViewById(R.id.map_view), getResources().getString(R.string.route_time), Snackbar.LENGTH_INDEFINITE);
-                snackbar.setAction("Start Navigation of Route Added", new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        updateView(mRoutes.size() - 1);
-                    }
-                });
-                snackbar.show();
-            }
-        });
-        builder.setNegativeButton(android.R.string.cancel, null);
-        builder.setView(view);
-        builder.create().show();
     }
 
     private void updateView(int pos) {
@@ -407,7 +379,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             public void onCancelled(DatabaseError databaseError) {
             }
         });
-
         if (currentRoute.getLatPolyPoint() != null && currentRoute.getLatPolyPoint() != null) {
             PolylineOptions polylineOptions = new PolylineOptions();
             for (int i = 0; i < currentRoute.getLatPolyPoint().size(); i++) {
@@ -418,13 +389,9 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
     }
 
-    private void zoomToRouteView(Route route) {
-        LatLngBounds.Builder builder = new LatLngBounds.Builder();
-        //builder.include(route.getStartGate());
-        //builder.include(route.getDestGate());
-        LatLngBounds bounds = builder.build();
-        CameraUpdate cu = CameraUpdateFactory.newLatLngBounds(bounds, 10);
-        mMap.animateCamera(cu);
+    private void addPolyline(DirectionsResult results, GoogleMap mMap) {
+        List<LatLng> decodedPath = PolyUtil.decode(results.routes[0].overviewPolyline.getEncodedPath());
+        mMap.addPolyline(new PolylineOptions().addAll(decodedPath));
     }
 
     /**
@@ -442,20 +409,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     }
 
-    private void addMarkersToMap(DirectionsResult results, GoogleMap mMap) {
-        mMap.addMarker(new MarkerOptions().position(new LatLng(results.routes[0].legs[0].startLocation.lat, results.routes[0].legs[0].startLocation.lng)).title(results.routes[0].legs[0].startAddress));
-        mMap.addMarker(new MarkerOptions().position(new LatLng(results.routes[0].legs[0].endLocation.lat, results.routes[0].legs[0].endLocation.lng)).title(results.routes[0].legs[0].startAddress).snippet(getEndLocationTitle(results)));
-    }
-
-    private String getEndLocationTitle(DirectionsResult results) {
-        return "Time :" + results.routes[0].legs[0].duration.humanReadable + " Distance :" + results.routes[0].legs[0].distance.humanReadable;
-    }
-
-    private void addPolyline(DirectionsResult results, GoogleMap mMap) {
-        List<LatLng> decodedPath = PolyUtil.decode(results.routes[0].overviewPolyline.getEncodedPath());
-        mMap.addPolyline(new PolylineOptions().addAll(decodedPath));
-    }
-
     private GeoApiContext getGeoContext() {
         GeoApiContext geoApiContext = new GeoApiContext();
         return geoApiContext.setQueryRateLimit(3)
@@ -466,21 +419,8 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
     @Override
-    public void onSwipe() {
-        FragmentManager fm = getSupportFragmentManager();
-        FragmentTransaction ft = fm.beginTransaction();
-        fm.popBackStackImmediate();
-        ft.commit();
-    }
-
-    @Override
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
         Log.d("ERROR", "Connection to Google failed");
-    }
-
-    @Override
-    public void onLogin(String email, String password) {
-        mAuth.signInWithEmailAndPassword(email, password).addOnCompleteListener(mOnCompleteListener);
     }
 
     @Override
@@ -489,19 +429,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         startActivityForResult(intent, RC_GOOGLE_LOGIN);
     }
 
-    @Override
-    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-        updateView(position);
-    }
-
-    @Override
-    public void onNothingSelected(AdapterView<?> parent) {
-
-    }
-
-
     private class AirportValueEventListener implements ValueEventListener {
-
         AutoCompleteTextView airportAutoComplete;
 
         public AirportValueEventListener(AutoCompleteTextView airportNameEditText) {
@@ -527,7 +455,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
     private class GateValueEventListener implements ValueEventListener {
-
         private AutoCompleteTextView startGateAutoComplete;
         private AutoCompleteTextView destGateAutoComplete;
 
@@ -546,7 +473,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 mGates.add(gateLabel);
             }
             ArrayAdapter<String> autoAdapter = new ArrayAdapter<String>(MapsActivity.this, android.R.layout.simple_list_item_1, mGates);
-            //AutoCompleteTextView airportAbbrText = findViewById(R.id.airport_name_editText);
             startGateAutoComplete.setAdapter(autoAdapter);
             destGateAutoComplete.setAdapter(autoAdapter);
         }
@@ -558,12 +484,10 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
     private class RouteValueEventListener implements ValueEventListener {
-
         private String routeName;
         private String routeID;
         private String startGateID;
         private String destGateID;
-
 
         public RouteValueEventListener(String routeName, String routeID, String startGateID, String destGateID) {
             this.routeName = routeName;
@@ -574,8 +498,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
         @Override
         public void onDataChange(DataSnapshot dataSnapshot) {
-            //TODO: we're going to want to get a route from "route" and then create a route object.
-            //TODO: then push to userRoutesRef
             if (dataSnapshot.getValue() != null) {
                 Route route = dataSnapshot.getValue(Route.class);
                 route.setRouteID(dataSnapshot.getKey());
@@ -587,7 +509,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 String userRouteID = mUserRoutesRef.push().getKey();
                 mUserRoutesRef.child(userRouteID).setValue(route);
             }
-
         }
 
         @Override
@@ -597,7 +518,6 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     }
 
     private class UserRouteChildEventListener implements ChildEventListener {
-
         @Override
         public void onChildAdded(DataSnapshot dataSnapshot, String s) {
             Route route = dataSnapshot.getValue(Route.class);
@@ -639,16 +559,26 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         }
     }
 
+    private void setAdapter() {
+        ArrayAdapter<Route> spinnerAdapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, mRoutes);
+        spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        mRouteSpinner.setAdapter(spinnerAdapter);
+        mRouteSpinner.setOnItemSelectedListener(this);
+    }
+
     private void updateToDefault() {
         mMap.clear();
         mSpinnerTitleTextView.setText(R.string.my_routes);
         mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(0,0), 1));
     }
 
-    private void setAdapter() {
-        ArrayAdapter<Route> spinnerAdapter = new ArrayAdapter<>(this, android.R.layout.simple_list_item_1, mRoutes);
-        spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        mRouteSpinner.setAdapter(spinnerAdapter);
-        mRouteSpinner.setOnItemSelectedListener(this);
+    @Override
+    public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+        updateView(position);
+    }
+
+    @Override
+    public void onNothingSelected(AdapterView<?> parent) {
+
     }
 }
