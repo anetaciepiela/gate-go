@@ -92,6 +92,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
     private boolean isLoggedIn;
     private LatLng currStartGateCoord;
     private LatLng currDestGateCoord;
+    private Route currentRoute;
 
     private FirebaseAuth mAuth;
     private FirebaseAuth.AuthStateListener mAuthListener;
@@ -263,9 +264,17 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             @Override
             public void onClick(DialogInterface dialog, int which) {
                 Route route = mRoutes.get(which);
+                Log.d("GGO", "before deleted: " + mRoutes.toString());
                 mUserRoutesRef.child(route.getKey()).removeValue();
+                Log.d("GGO", "after deleted: " + mRoutes.toString());
+//                if (route.equals(currentRoute)) {
+//                    if (which == 0) {
+//                        updateView(which);
+//                    }
+//                }
             }
         });
+
         builder.setNegativeButton(android.R.string.cancel, null);
         builder.create().show();
     }
@@ -370,7 +379,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
 
     private void updateView(int pos) {
         mMap.clear();
-        final Route currentRoute = mRoutes.get(pos);
+        currentRoute = mRoutes.get(pos);
         mSpinnerTitleTextView.setText(currentRoute.toString());
         DatabaseReference startGateByRoute = mGateRef.child(currentRoute.getStartGateID());
         startGateByRoute.keepSynced(true);
@@ -608,6 +617,12 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             for(Route r : mRoutes) {
                 if(routeKeyToDelete.equals(r.getKey())) {
                     mRoutes.remove(r);
+                    if (mRoutes.isEmpty()) {
+                        updateToDefault();
+                    }
+                    else {
+                        updateView(0);
+                    }
                     return;
                 }
             }
@@ -622,6 +637,12 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
         public void onCancelled(DatabaseError databaseError) {
 
         }
+    }
+
+    private void updateToDefault() {
+        mMap.clear();
+        mSpinnerTitleTextView.setText(R.string.my_routes);
+        mMap.moveCamera(CameraUpdateFactory.newLatLngZoom(new LatLng(0,0), 1));
     }
 
     private void setAdapter() {
