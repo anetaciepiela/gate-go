@@ -23,7 +23,7 @@
 
             <Spinner
                 android:id="@+id/route_spinner"
-                style="@style/TextBoxStyle"
+                style="@style/SpinnerStyle"
                 android:dropDownWidth="350dp"
                 android:spinnerMode="dropdown"
                 android:layout_marginTop="15dp">
@@ -36,7 +36,7 @@
                 android:textSize="17sp"
                 android:textColor="#000"
                 android:background="@drawable/dropdown_01"
-                style="@style/TextBoxStyle" />
+                style="@style/SpinnerStyle" />
 
         </RelativeLayout>
 

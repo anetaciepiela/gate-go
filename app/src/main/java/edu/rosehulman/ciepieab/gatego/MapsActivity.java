@@ -385,7 +385,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
                 LatLng currCoord = new LatLng(currentRoute.getLatPolyPoint().get(i), currentRoute.getLongPolyPoint().get(i));
                 polylineOptions.add(currCoord);
             }
-            mMap.addPolyline(polylineOptions);
+            mMap.addPolyline(polylineOptions).setColor(getResources().getColor(R.color.gateGoGreen));
         }
     }
 
@@ -501,6 +501,7 @@ public class MapsActivity extends AppCompatActivity implements OnMapReadyCallbac
             if (dataSnapshot.getValue() != null) {
                 Route route = dataSnapshot.getValue(Route.class);
                 route.setRouteID(dataSnapshot.getKey());
+                route.setRouteName(routeName);
                 String userRouteID = mUserRoutesRef.push().getKey();
                 mUserRoutesRef.child(userRouteID).setValue(route);
             }
